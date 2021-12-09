@@ -1,2 +1,7 @@
-# app-installer
-Automate installation of Banyan app on end-user devices
+# Banyan App Installer
+
+Automate installation of Banyan App on end-user devices.
+
+**[Windows](windows)**
+
+**[MacOS](macos)**
