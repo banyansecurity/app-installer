@@ -1,4 +1,3 @@
-
 ############Update to your Key#############
 DEPLOYMENT_KEY="INSERT_DEPLOYMENT_KEY"
 VERSION="2.5.0"
@@ -28,18 +27,17 @@ IFS='.' read osvers_major osvers_minor osvers_dot_version <<< "$(/usr/bin/sw_ver
 
 if [[ ${osvers_major} -ge 11 ]]; then
 
-processor=$(/usr/sbin/sysctl -n machdep.cpu.brand_string | grep -o "Intel")
+    processor=$(/usr/sbin/sysctl -n machdep.cpu.brand_string | grep -o "Intel")
 
-  if [[ -n "$processor" ]];
-  then
+    if [[ -n "$processor" ]]; then
         # Download DMG
         curl -L https://www.banyanops.com/app/releases/Banyan-"$VERSION".dmg -o /tmp/Banyan.dmg
-
-  else
+    else
         # Download DMG
-  	curl -L https://www.banyanops.com/app/releases/Banyan-"$VERSION"-arm-arm64.dmg -o /tmp/Banyan.dmg
+      	curl -L https://www.banyanops.com/app/releases/Banyan-"$VERSION"-arm-arm64.dmg -o /tmp/Banyan.dmg
+    fi
 fi
-fi
+
 # Mount DMG
 hdiutil attach /tmp/Banyan.dmg -nobrowse
 

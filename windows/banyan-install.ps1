@@ -1,10 +1,8 @@
-
-
 function Delete() {
-$Invocation = (Get-Variable MyInvocation -Scope 1).Value
-$Path = ".\Banyan-Install-2.0.ps1"
-Write-Host $Path 
-Remove-Item $Path -force
+    $Invocation = (Get-Variable MyInvocation -Scope 1).Value
+    $Path = ".\Banyan-Install-2.0.ps1"
+    Write-Host $Path 
+    Remove-Item $Path -force
 } 
 
 # Create Folders
@@ -29,12 +27,13 @@ sleep 10
 
 # Open App as Current User
 $scriptblock = {
-& 'C:\Program Files\Banyan\Banyan.exe'
+    & 'C:\Program Files\Banyan\Banyan.exe'
 }
+
 try{
-Invoke-AsCurrentUser -scriptblock $scriptblock
-} catch{
-write-error "Something went wrong"
+    Invoke-AsCurrentUser -scriptblock $scriptblock
+} catch {
+    write-error "Something went wrong"
 }
 sleep 10
 
