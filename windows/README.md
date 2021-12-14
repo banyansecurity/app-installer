@@ -1,31 +1,24 @@
 # Install Banyan App on Windows
 
-## Install
+## Run as Administrator in PowerShell 
 
 ```
-./banyan-install.sh YOUR_DEPLOY_KEY
+.\banyan-install.sh <APP_VERSION> <INVITE_CODE> <DEPLOY_KEY>
 ```
 
-## Upgrade
-
-```
-./banyan-upgrade.sh NEW_APP _VERSION
-```
+The `start_app` function only works if run as SYSTEM, so will fail in Admin Powershell. See instructions below to run as SYSTEM.
 
 
+## Run as SYSTEM using PSTools
 
----
+1. Download [PSTools](https://docs.microsoft.com/en-us/sysinternals/downloads/psexec) from here: https://download.sysinternals.com/files/PSTools.zip
 
-1. Download PSTools from here https://download.sysinternals.com/files/PSTools.zip
-2. Extract the PSTools.zip.zip file to C:\Windows\System32\
-3. Open CMD.exe as Administrator
-4. Enter this command
-psexec -i -s cmd.exe -i
-5. In the new CMD window enter this command
-powershell
-6. In this same window change the directory to the folder with all the install files
-	6a. This folder should include:
-		Banyan-Install.ps1
-		mdm-config.json
-7. Run this command once the directory is set to this folder
-.\Banyan-Install.ps1
+2. Extract the PSTools.zip file to your admin executable path (such as: `C:\Windows\System32`)
+
+3. Open Command Prompt (`cmd.exe`) as Administrator, and launch Powershell with a System account:
+
+		psexec -i -s powershell.exe
+
+4. In Powershell, navigate to this directory and run
+
+		.\banyan-install.sh <APP_VERSION> <INVITE_CODE> <DEPLOY_KEY>

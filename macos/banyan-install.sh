@@ -96,7 +96,7 @@ function stage() {
 }
 
 function set_launch_agent() {
-	echo "Creating LaunchAgent, so app launches upon next login"
+	echo "Creating LaunchAgent, so app launches upon user login"
 	launch_xml='<?xml version="1.0" encoding="UTF-8"?>
 	<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 	<plist version="1.0">
@@ -126,6 +126,7 @@ function set_launch_agent() {
 function start_app() {
 	echo "Starting the Banyan app as console user"
 	su - "${console_user}" -c 'open /Applications/Banyan.app'
+	sleep 10
 }
 
 function stop_app() {

@@ -9,7 +9,7 @@ if (! $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Admini
     Write-Error "This script must be run as Administrator"   
     exit 1
 } else {
-    Write-Host "Installing app"
+    Write-Host "Installing app for user: $env:USERNAME"
 }
 
 if (!$APP_VERSION -or !$INVITE_CODE -or !$DEPLOY_KEY) {
@@ -90,7 +90,7 @@ function stage() {
 }
 
 function set_scheduled_task() {
-    Write-Host "Creating Sched Task, so app launches upon next login"
+    Write-Host "Creating ScheduledTask, so app launches upon user login"
     $ShedService = New-Object -comobject 'Schedule.Service'
     $ShedService.Connect()
     $Task = $ShedService.NewTask(0)
@@ -106,7 +106,7 @@ function set_scheduled_task() {
 }
 
 function start_app() {
-    Write-Host "Starting the Banyan app as current user; need to be SYSTEM not just Admin"
+    Write-Host "Starting the Banyan app as current user; this function needs to be run as SYSTEM (not just Admin)"
 
     Install-Module RunAsUser -Force
 
@@ -117,7 +117,7 @@ function start_app() {
     try {
         Invoke-AsCurrentUser -scriptblock $scriptblock
     } catch {
-        Write-Error "Couldn't start Banyan app"
+        Write-Warning "Couldn't start Banyan app"
     }
     sleep 10
 
@@ -129,9 +129,9 @@ function stop_app() {
     Stop-Process -Name Banyan -Force
 }
 
-#create_config
-#download_extract
-#stage
+create_config
+download_extract
+stage
 set_scheduled_task
 start_app
 
