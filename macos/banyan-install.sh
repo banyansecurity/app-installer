@@ -22,32 +22,39 @@ else
 	echo "Installing using deploy key: $DEPLOY_KEY"
 fi
 
-etc_dir="/private/etc/banyanapp"
-mdm_config_json='{
-	"mdm_invite_code": "REPLACE_WITH_INVITE_CODE",
-	"mdm_deploy_user": "REPLACE_WITH_USER",
-	"mdm_deploy_email": "REPLACE_WITH_EMAIL",
-	"mdm_device_ownership": "C",
-	"mdm_ca_certs_preinstalled": true,
-	"mdm_skip_cert_suppression": true,
-	"mdm_present": true,
-	"mdm_vendor_name": "JAMF",
-	"mdm_start_at_boot": true,
-	"mdm_hide_on_start": true	
-}'
+global_config_dir="/private/etc/banyanapp"
+tmp_dir="/tmp"
+
 function create_config() {
-	echo "Creating mdm-config directory"
-	mkdir -p "$etc_dir"
-	echo "$mdm_config_json" > "${etc_dir}/mdm-config.json"
-	sed -i '' "s/REPLACE_WITH_INVITE_CODE/${INVITE_CODE}/" "${etc_dir}/mdm-config.json"
-	sed -i '' "s/REPLACE_WITH_USER/${console_user}/" "${etc_dir}/mdm-config.json"
-	sed -i '' "s/REPLACE_WITH_EMAIL/${console_user}@banyansecurity.io/" "${etc_dir}/mdm-config.json"
+	echo "Creating mdm-config json file"
+
+	global_config_file="${global_config_dir}/mdm-config.json"
+
+	mdm_config_json='{
+		"mdm_invite_code": "REPLACE_WITH_INVITE_CODE",
+		"mdm_deploy_user": "REPLACE_WITH_USER",
+		"mdm_deploy_email": "REPLACE_WITH_EMAIL",
+		"mdm_device_ownership": "C",
+		"mdm_ca_certs_preinstalled": true,
+		"mdm_skip_cert_suppression": true,
+		"mdm_present": true,
+		"mdm_vendor_name": "JAMF",
+		"mdm_start_at_boot": true,
+		"mdm_hide_on_start": true	
+	}'
+
+	mkdir -p "$global_config_dir"
+	echo "$mdm_config_json" > "${global_config_file}"
+	sed -i '' "s/REPLACE_WITH_INVITE_CODE/${INVITE_CODE}/" "${global_config_file}"
+	sed -i '' "s/REPLACE_WITH_USER/${console_user}/" "${global_config_file}"
+	sed -i '' "s/REPLACE_WITH_EMAIL/${console_user}@banyansecurity.io/" "${global_config_file}"
 }
 
-tmp_dir="/tmp"
-arm_suffix=""
+
 function download_extract() {
-	echo "Downloading DMG"
+	echo "Downloading installer DMG"
+
+	arm_suffix=""
 
 	# check to see if the Mac is Intel or M1
 	IFS='.' read osvers_major osvers_minor osvers_dot_version <<< "$(/usr/bin/sw_vers -productVersion)"
@@ -59,16 +66,18 @@ function download_extract() {
 	    	# arm_suffix="-arm-arm64"
 	    fi
 	fi
-	full_version="${APP_VERSION}${arm_suffix}"
 
-	if [[ -f "${tmp_dir}/Banyan-${full_version}.dmg" ]]; then
-		echo "DMG already downloaded"
+	full_version="${APP_VERSION}${arm_suffix}"
+	dl_file="${tmp_dir}/Banyan-${full_version}.dmg"
+
+	if [[ -f "${dl_file}" ]]; then
+		echo "Installer DMG already downloaded"
 	else
-		curl -sL "https://www.banyanops.com/app/releases/Banyan-${full_version}.dmg" -o "${tmp_dir}/Banyan-${full_version}.dmg"
+		curl -sL "https://www.banyanops.com/app/releases/Banyan-${full_version}.dmg" -o "${dl_file}"
 	fi
 
 	# Mount DMG
-	hdiutil attach "${tmp_dir}/Banyan-${full_version}.dmg" -nobrowse
+	hdiutil attach "${dl_file}" -nobrowse
 
 	# Copy Banyan.app to Applications
 	ditto "/Volumes/Banyan ${full_version}/Banyan.app" "/Applications/Banyan.app"
@@ -114,12 +123,12 @@ function set_launch_agent() {
 	chown $USER /Library/LaunchAgents/com.banyanapp.autoopen.plist
 }
 
-function start() {
+function start_app() {
 	echo "Starting the Banyan app as console user"
 	su - "${console_user}" -c 'open /Applications/Banyan.app'
 }
 
-function stop () {
+function stop_app() {
 	echo "Stopping Banyan app"
 	killall Banyan
 }
@@ -128,3 +137,4 @@ create_config
 download_extract
 stage
 set_launch_agent
+start_app

@@ -5,11 +5,11 @@
 ## Install
 
 ```
-./banyan-install.sh <APP_VERSION> <INVITE_CODE> <DEPLOY_KEY>
+sudo ./banyan-install.sh <APP_VERSION> <INVITE_CODE> <DEPLOY_KEY>
 ```
 
 ## Upgrade
 
 ```
-./banyan-upgrade.sh APP_VERSION
+sudo ./banyan-upgrade.sh <APP_VERSION>
 ```

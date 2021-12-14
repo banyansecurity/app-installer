@@ -89,8 +89,24 @@ function stage() {
     Write-Host "Staged deployment done. Have the user start the Banyan app to complete registration."
 }
 
+function set_scheduled_task() {
+    Write-Host "Creating Sched Task, so app launches upon next login"
+    $ShedService = New-Object -comobject 'Schedule.Service'
+    $ShedService.Connect()
+    $Task = $ShedService.NewTask(0)
+    $Task.RegistrationInfo.Description = 'Opens Banyan at login for any user'
+    $Task.Settings.Enabled = $true
+    $Task.Settings.AllowDemandStart = $true
+    $trigger = $task.triggers.Create(9)
+    $trigger.Enabled = $true
+    $action = $Task.Actions.Create(0)
+    $action.Path = '"C:\Program Files\Banyan\Banyan.exe"'
+    $taskFolder = $ShedService.GetFolder("\")
+    $taskFolder.RegisterTaskDefinition('Open Banyan', $Task , 6, 'Users', $null, 4)    
+}
+
 function start_app() {
-    Write-Host "Starting the Banyan app as current user"
+    Write-Host "Starting the Banyan app as current user; need to be SYSTEM not just Admin"
 
     Install-Module RunAsUser -Force
 
@@ -116,6 +132,7 @@ function stop_app() {
 #create_config
 #download_extract
 #stage
+set_scheduled_task
 start_app
 
 
