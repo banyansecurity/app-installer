@@ -44,7 +44,9 @@ function download_extract () {
 
 # Stop current Banyan app
 killall Banyan
+
 # Extract new version
 download_extract
+
 # Open Banyan as current user
 su - "${console_user}" -c 'open /Applications/Banyan.app'

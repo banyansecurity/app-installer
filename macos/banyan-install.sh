@@ -96,7 +96,12 @@ function set_launch_agent () {
 	chown $USER /Library/LaunchAgents/com.banyanapp.autoopen.plist
 }
 
+# Install and run staged install
 create_dir
 download_extract
 stage
 set_launch_agent
+
+# Open Banyan as current user
+su - "${console_user}" -c 'open /Applications/Banyan.app'
+
