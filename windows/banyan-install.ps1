@@ -31,7 +31,7 @@ function stage() {
     sleep 10
 }
 
-function launch() {
+function start() {
     # Install install-module RunAsUser 
     install-module RunAsUser -Force
 
