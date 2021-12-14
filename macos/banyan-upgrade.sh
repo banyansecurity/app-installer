@@ -1,45 +1,50 @@
 #!/bin/bash
-# Created by Kyle Ericson
-# Version 1.0
 
-############Update to your Version String#############
-VERSION="2.5.0"
-############Update to your Version String#############
+APP_VERSION=$1
 
-# Get Current User
-currentUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
+if [[ $USER != "root" ]]; then
+    echo "This script must be run as root"
+    exit 1
+else
+    console_user=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
+    echo "Installing app for console user: $console_user"
+fi
 
-# Kill Banyan
+if [[ -z "$APP_VERSION" ]]; then
+    echo "Usage: "
+    echo "$0 <APP_VERSION>"
+    exit 1
+else
+    echo "Upgrading to app version: $APP_VERSION"
+fi
+
+tmp_dir="/tmp"
+arm_suffix=""
+function download_extract () {
+    # check to see if the Mac is Intel or M1
+    IFS='.' read osvers_major osvers_minor osvers_dot_version <<< "$(/usr/bin/sw_vers -productVersion)"
+    if [[ ${osvers_major} -ge 11 ]]; then
+        processor=$(/usr/sbin/sysctl -n machdep.cpu.brand_string | grep -o "Intel")
+        if [[ -z "$processor" ]]; then
+            arm_suffix="-arm-arm64"
+        fi
+    fi
+
+    # curl -L "https://www.banyanops.com/app/releases/Banyan-${APP_VERSION}${arm_suffix}.dmg" -o "${tmp_dir}/Banyan.dmg"
+
+    # Mount DMG
+    hdiutil attach "${tmp_dir}/Banyan.dmg" -nobrowse
+
+    # Copy Banyan.app to Applications
+    ditto "/Volumes/Banyan ${APP_VERSION}${arm_suffix}/Banyan.app" "/Applications/Banyan.app"
+
+    # Set ownership to console_user
+    chown -R $console_user /Applications/Banyan.app
+}
+
+# Stop current Banyan app
 killall Banyan
-
-# Check to see if the Mac is Intel or M1
-OLDIFS=$IFS
-IFS='.' read osvers_major osvers_minor osvers_dot_version <<< "$(/usr/bin/sw_vers -productVersion)"
-
-if [[ ${osvers_major} -ge 11 ]]; then
-
-processor=$(/usr/sbin/sysctl -n machdep.cpu.brand_string | grep -o "Intel")
-
-  if [[ -n "$processor" ]];
-  then
-        # Download DMG
-        curl -L https://www.banyanops.com/app/releases/Banyan-"$VERSION".dmg -o /tmp/Banyan.dmg
-
-  else
-        # Download DMG
-  	curl -L https://www.banyanops.com/app/releases/Banyan-"$VERSION"-arm-arm64.dmg -o /tmp/Banyan.dmg
-fi
-fi
-# Mount DMG
-hdiutil attach /tmp/Banyan.dmg -nobrowse
-
-# Copy Banyan.app to Applications
-ditto "/Volumes/Banyan "$VERSION"/Banyan.app" "/Applications/Banyan.app"
-
-# Set ownership to current user
-chown -R $currentUser /Applications/Banyan.app
-
+# Extract new version
+download_extract
 # Open Banyan as current user
-su - "${currentUser}" -c 'open /Applications/Banyan.app'
-
-exit 0
+su - "${console_user}" -c 'open /Applications/Banyan.app'
