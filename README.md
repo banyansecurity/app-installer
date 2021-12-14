@@ -19,13 +19,12 @@ To test, launch Powershell as SYSTEM using PSTools, and run `banyan-windows.ps1`
 
 2. Extract the PSTools.zip file to your admin executable path (such as: `C:\Windows\System32`)
 
-3. Open Command Prompt (`cmd.exe`) as Administrator, and launch Powershell as SYSTEM:
+3. Open Command Prompt (`cmd.exe`) as Administrator, and launch Powershell with a System account:
 
 		psexec -i -s powershell.exe
 
-4. In this Powershell, navigate to the directory and run
+4. In Powershell, navigate to this directory and run
 
 		.\banyan-windows.ps1 <APP_VERSION> <INVITE_CODE> <DEPLOY_KEY>
-
 
 We use PSTools (and not just Admin Powershell) because: (a) that's how Intune runs, and (b) the `start_app` function only works if run as SYSTEM.

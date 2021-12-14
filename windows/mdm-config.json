@@ -1,6 +1,0 @@
-{
-	"mdm_invite_code": "INSERT",
-	"mdm_start_at_boot": true,
-	"mdm_hide_services": true,
-	"mdm_hide_on_start": true
-}
