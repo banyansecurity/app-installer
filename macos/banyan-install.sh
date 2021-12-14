@@ -83,7 +83,7 @@ function download_extract() {
 function stage() {
 	echo "Running staged deployment"
 	/Applications/Banyan.app/Contents/MacOS/Banyan --staged-deploy-key=$DEPLOY_KEY
-	echo "Staged deploment complete"
+	echo "Staged deployment done. Have the user start the Banyan app to complete registration."
 }
 
 function set_launch_agent() {
