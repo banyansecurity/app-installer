@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 APP_VERSION=$1
 INVITE_CODE=$2
 DEPLOY_KEY=$3
@@ -20,56 +18,76 @@ if [[ -z "$APP_VERSION" || -z "$INVITE_CODE" || -z "$DEPLOY_KEY" ]]; then
 	exit 1
 else
 	echo "Installing app version: $APP_VERSION"
-	echo "For org w invite code: $INVITE_CODE"
-	echo "Using deploy key: $DEPLOY_KEY"
+	echo "Installing with invite code: $INVITE_CODE"
+	echo "Installing using deploy key: $DEPLOY_KEY"
 fi
 
 etc_dir="/private/etc/banyanapp"
 mdm_config_json='{
 	"mdm_invite_code": "REPLACE_WITH_INVITE_CODE",
+	"mdm_deploy_user": "REPLACE_WITH_USER",
+	"mdm_deploy_email": "REPLACE_WITH_EMAIL",
+	"mdm_device_ownership": "C",
+	"mdm_ca_certs_preinstalled": true,
+	"mdm_skip_cert_suppression": true,
 	"mdm_present": true,
-	"mdm_vendor_name": JAMF,
+	"mdm_vendor_name": "JAMF",
 	"mdm_start_at_boot": true,
-	"mdm_hide_services": true,
 	"mdm_hide_on_start": true	
 }'
-function create_dir () {
+function create_config() {
+	echo "Creating mdm-config directory"
 	mkdir -p "$etc_dir"
 	echo "$mdm_config_json" > "${etc_dir}/mdm-config.json"
 	sed -i '' "s/REPLACE_WITH_INVITE_CODE/${INVITE_CODE}/" "${etc_dir}/mdm-config.json"
+	sed -i '' "s/REPLACE_WITH_USER/${console_user}/" "${etc_dir}/mdm-config.json"
+	sed -i '' "s/REPLACE_WITH_EMAIL/${console_user}@banyansecurity.io/" "${etc_dir}/mdm-config.json"
 }
 
 tmp_dir="/tmp"
 arm_suffix=""
-function download_extract () {
+function download_extract() {
+	echo "Downloading DMG"
+
 	# check to see if the Mac is Intel or M1
 	IFS='.' read osvers_major osvers_minor osvers_dot_version <<< "$(/usr/bin/sw_vers -productVersion)"
 	if [[ ${osvers_major} -ge 11 ]]; then
 	    processor=$(/usr/sbin/sysctl -n machdep.cpu.brand_string | grep -o "Intel")
 	    if [[ -z "$processor" ]]; then
-	    	arm_suffix="-arm-arm64"
+	    	echo "ARM proc"
+	    	# TODO: ARM version doesn't work w ZT ... need to debug 
+	    	# arm_suffix="-arm-arm64"
 	    fi
 	fi
+	full_version="${APP_VERSION}${arm_suffix}"
 
-	curl -L "https://www.banyanops.com/app/releases/Banyan-${APP_VERSION}${arm_suffix}.dmg" -o "${tmp_dir}/Banyan.dmg"
+	if [[ -f "${tmp_dir}/Banyan-${full_version}.dmg" ]]; then
+		echo "DMG already downloaded"
+	else
+		curl -sL "https://www.banyanops.com/app/releases/Banyan-${full_version}.dmg" -o "${tmp_dir}/Banyan-${full_version}.dmg"
+	fi
 
 	# Mount DMG
-	hdiutil attach "${tmp_dir}/Banyan.dmg" -nobrowse
+	hdiutil attach "${tmp_dir}/Banyan-${full_version}.dmg" -nobrowse
 
 	# Copy Banyan.app to Applications
-	ditto "/Volumes/Banyan ${APP_VERSION}${arm_suffix}/Banyan.app" "/Applications/Banyan.app"
+	ditto "/Volumes/Banyan ${full_version}/Banyan.app" "/Applications/Banyan.app"
 
 	# Set ownership to console_user
 	chown -R $console_user /Applications/Banyan.app
+
+	# Unmount DMG
+	hdiutil detach "/Volumes/Banyan ${full_version}"
 }
 
-function stage () {
-	# Setup Staged Deployment Key
+function stage() {
+	echo "Running staged deployment"
 	/Applications/Banyan.app/Contents/MacOS/Banyan --staged-deploy-key=$DEPLOY_KEY
+	echo "Staged deploment complete"
 }
 
-function set_launch_agent () {
-	# Create LaunchAgent
+function set_launch_agent() {
+	echo "Creating LaunchAgent, so app launches upon next login"
 	launch_xml='<?xml version="1.0" encoding="UTF-8"?>
 	<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 	<plist version="1.0">
@@ -96,12 +114,17 @@ function set_launch_agent () {
 	chown $USER /Library/LaunchAgents/com.banyanapp.autoopen.plist
 }
 
-# Install and run staged install
-create_dir
+function start() {
+	echo "Starting the Banyan app as console user"
+	su - "${console_user}" -c 'open /Applications/Banyan.app'
+}
+
+function stop () {
+	echo "Stopping Banyan app"
+	killall Banyan
+}
+
+create_config
 download_extract
 stage
 set_launch_agent
-
-# Open Banyan as current user
-su - "${console_user}" -c 'open /Applications/Banyan.app'
-
