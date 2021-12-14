@@ -1,35 +1,37 @@
- # Created By Kyle Ericson
+###Enter Banyan Application Version (Example: 2.5.0)
+$VERSION="X.Y.Z"
 
-############Update to your Version String#############
-$VERSION="2.5.0"
-############Update to your Version String#############
+function download_extract() {
+    # Download Banyan Install file
+    $progressPreference = 'silentlyContinue'
+    invoke-webrequest "https://www.banyanops.com/app/releases/Banyan-Setup-"$VERSION".exe" -outfile "C:\ProgramData\banyantemp\Banyan-Setup-"$VERSION".exe" -UseBasicParsing
+    $progressPreference = 'Continue'
+    # Install Application
+    Start-Process C:\ProgramData\banyantemp\Banyan-Setup-"$VERSION".exe '/S' -Wait    
+}
 
-# Download Banyan Install file
-$progressPreference = 'silentlyContinue'
-invoke-webrequest "https://www.banyanops.com/app/releases/Banyan-Setup-$($VERSION).exe" -outfile "C:\ProgramData\Banyan-Setup-$($VERSION).exe" -UseBasicParsing
-$progressPreference = 'Continue'
+function launch() {
+    # Install install-module RunAsUser 
+    install-module RunAsUser -Force
 
-# Quit Banyan
+    # Open App as Current User
+    $scriptblock = {
+        & 'C:\Program Files\Banyan\Banyan.exe'
+    }
+
+    try{
+        Invoke-AsCurrentUser -scriptblock $scriptblock
+    } catch {
+        write-error "Something went wrong"
+    }
+    sleep 10
+
+    # Uninstall install-module RunAsUser 
+    Uninstall-Module RunAsUser -Force
+}
+
+# Stop current Banyan app
 Stop-Process -Name Banyan -Force
 
-# Install install-module RunAsUser 
-install-module RunAsUser -Force
-
-# Install Application
-Start-Process C:\ProgramData\Banyan-Setup-$($VERSION).exe '/S' -Wait
-
-# Open App as Current User
-$scriptblock = {
-& 'C:\Program Files\Banyan\Banyan.exe'
-}
-try{
-Invoke-AsCurrentUser -scriptblock $scriptblock
-} catch{
-write-error "Something went wrong"
-}
-sleep 10
-
-# Uninstall install-module RunAsUser 
-Uninstall-Module RunAsUser -Force
-
-exit 0 
+download_extract
+launch

@@ -42,11 +42,13 @@ function download_extract () {
     chown -R $console_user /Applications/Banyan.app
 }
 
+function launch () {
+    # Open Banyan as current user
+    su - "${console_user}" -c 'open /Applications/Banyan.app'
+}
+
 # Stop current Banyan app
 killall Banyan
 
-# Extract new version
 download_extract
-
-# Open Banyan as current user
-su - "${console_user}" -c 'open /Applications/Banyan.app'
+launch
