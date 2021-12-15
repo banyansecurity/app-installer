@@ -41,24 +41,26 @@ function create_config() {
     $global_config_dir = $global_profile_dir + "\" + $banyan_dir_name
     $global_config_file = $global_config_dir + "\" + "mdm-config.json"
 
-    # For Intune Deployments - Obtains email of user from Intune registry entry
+    $deploy_user = ""
+    $deploy_email = ""
+
+    # get user and email assuming device is joined to an Azure AD domain
+    # https://nerdymishka.com/articles/azure-ad-domain-join-registry-keys/
     $intune_info = "HKLM:\SYSTEM\CurrentControlSet\Control\CloudDomainJoin\JoinInfo"
-    $intune_user = ""
-    $intune_email = ""
     if (Test-Path $intune_info) {
         Write-Host "Intune deployment - extracting user email"
         $ADJoinInfo = Get-ChildItem -path $intune_info
         $ADJoinInfo = $ADJoinInfo -replace "HKEY_LOCAL_MACHINE","HKLM:"
         $ADJoinUser = Get-ItemProperty -Path $ADJoinInfo
-        $intune_email = $ADJoinUser.UserEmail
-        $intune_user = $intune_email.Split("@")[0]
+        $deploy_email = $ADJoinUser.UserEmail
+        $deploy_user = $intune_email.Split("@")[0]
         Write-Host "Intune deployment - found user - $intune_email, $intune_user"
     }
 
     $json = [pscustomobject]@{ 
         mdm_invite_code = $INVITE_CODE
-        mdm_deploy_user = $intune_user
-        mdm_deploy_email = $intune_email 
+        mdm_deploy_user = $deploy_user
+        mdm_deploy_email = $deploy_email 
         mdm_device_ownership = "C"
         mdm_present = $true
         mdm_vendor_name = "Intune"

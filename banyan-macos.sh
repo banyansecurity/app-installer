@@ -25,8 +25,8 @@ echo "Installing with invite code: $INVITE_CODE"
 echo "Installing using deploy key: $DEPLOYMENT_KEY"
 echo "Installing app version: $APP_VERSION"
 
-console_user=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
-echo "Installing app for console user: $console_user"
+logged_on_user=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
+echo "Installing app for user: $logged_on_user"
 
 global_config_dir="/private/etc/banyanapp"
 tmp_dir="/tmp"
@@ -36,6 +36,16 @@ function create_config() {
 	echo "Creating mdm-config json file"
 
 	global_config_file="${global_config_dir}/mdm-config.json"
+
+	deploy_user=""
+	deploy_email=""
+
+    # get user and email from custom plist file deployed via Device Manager
+	# https://github.com/pbowden-msft/SignInHelper
+	if [[ -e "/Library/Managed Preferences/custom.plist" ]]; then
+		deploy_user=$( defaults read "/Library/Managed Preferences/custom.plist" name )
+		deploy_email=$( defaults read "/Library/Managed Preferences/custom.plist" email )	
+	fi
 
 	mdm_config_json='{
 		"mdm_invite_code": "REPLACE_WITH_INVITE_CODE",
@@ -53,8 +63,8 @@ function create_config() {
 	mkdir -p "$global_config_dir"
 	echo "$mdm_config_json" > "${global_config_file}"
 	sed -i '' "s/REPLACE_WITH_INVITE_CODE/${INVITE_CODE}/" "${global_config_file}"
-	sed -i '' "s/REPLACE_WITH_USER/${console_user}/" "${global_config_file}"
-	sed -i '' "s/REPLACE_WITH_EMAIL/${console_user}@banyansecurity.io/" "${global_config_file}"
+	sed -i '' "s/REPLACE_WITH_USER/${deploy_user}/" "${global_config_file}"
+	sed -i '' "s/REPLACE_WITH_EMAIL/${deploy_email}/" "${global_config_file}"
 }
 
 
@@ -89,8 +99,8 @@ function download_extract() {
 	# Copy Banyan.app to Applications
 	ditto "/Volumes/Banyan ${full_version}/Banyan.app" "/Applications/Banyan.app"
 
-	# Set ownership to console_user
-	chown -R $console_user /Applications/Banyan.app
+	# Set ownership to logged_on_user
+	chown -R $logged_on_user /Applications/Banyan.app
 
 	# Unmount DMG
 	hdiutil detach "/Volumes/Banyan ${full_version}"
@@ -134,9 +144,9 @@ function set_launch_agent() {
 
 
 function start_app() {
-	echo "Starting the Banyan app as console user"
-	su - "${console_user}" -c 'open /Applications/Banyan.app'
-	sleep 10
+	echo "Starting the Banyan app as logged-on user"
+	su - "${logged_on_user}" -c 'open /Applications/Banyan.app'
+	sleep 5
 }
 
 
