@@ -1,29 +1,36 @@
 #!/bin/bash
 
-APP_VERSION=$1
-INVITE_CODE=$2
-DEPLOY_KEY=$3
+INVITE_CODE=$1
+DEPLOYMENT_KEY=$2
+APP_VERSION=$3
 
-if [[ $USER != "root" ]]; then
-	echo "This script must be run as root"
+if id -Gn $USER | grep -q -w -v admin; then
+	echo "This script must be run with admin privilege"
 	exit 1
-else
-    console_user=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
-	echo "Installing app for console user: $console_user"
 fi
 
-if [[ -z "$APP_VERSION" || -z "$INVITE_CODE" || -z "$DEPLOY_KEY" ]]; then
+if [[ -z "$INVITE_CODE" || -z "$DEPLOYMENT_KEY" ]]; then
 	echo "Usage: "
-	echo "$0 <APP_VERSION> <INVITE_CODE> <DEPLOY_KEY>"
+	echo "$0 <INVITE_CODE> <DEPLOYMENT_KEY> <APP_VERSION (optional>"
 	exit 1
-else
-	echo "Installing app version: $APP_VERSION"
-	echo "Installing with invite code: $INVITE_CODE"
-	echo "Installing using deploy key: $DEPLOY_KEY"
 fi
+
+if [[ -z "$APP_VERSION" ]]; then
+	echo "Checking for latest version of app"
+	loc=$( curl -sI https://www.banyanops.com/app/macos/latest | awk '/Location:/ {print $2}' )
+	APP_VERSION=$( awk -F'Banyan-|.dmg' '{print $2}' <<< "$loc" )
+fi
+
+echo "Installing with invite code: $INVITE_CODE"
+echo "Installing using deploy key: $DEPLOYMENT_KEY"
+echo "Installing app version: $APP_VERSION"
+
+console_user=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
+echo "Installing app for console user: $console_user"
 
 global_config_dir="/private/etc/banyanapp"
 tmp_dir="/tmp"
+
 
 function create_config() {
 	echo "Creating mdm-config json file"
@@ -89,11 +96,13 @@ function download_extract() {
 	hdiutil detach "/Volumes/Banyan ${full_version}"
 }
 
+
 function stage() {
 	echo "Running staged deployment"
-	/Applications/Banyan.app/Contents/MacOS/Banyan --staged-deploy-key=$DEPLOY_KEY
+	/Applications/Banyan.app/Contents/MacOS/Banyan --staged-deploy-key=$DEPLOYMENT_KEY
 	echo "Staged deployment done. Have the user start the Banyan app to complete registration."
 }
+
 
 function set_launch_agent() {
 	echo "Creating LaunchAgent, so app launches upon user login"
@@ -120,8 +129,9 @@ function set_launch_agent() {
 	</plist>'
 
 	echo "$launch_xml" > /Library/LaunchAgents/com.banyanapp.autoopen.plist
-	chown $USER /Library/LaunchAgents/com.banyanapp.autoopen.plist
+	chown root /Library/LaunchAgents/com.banyanapp.autoopen.plist
 }
+
 
 function start_app() {
 	echo "Starting the Banyan app as console user"
@@ -129,10 +139,12 @@ function start_app() {
 	sleep 10
 }
 
+
 function stop_app() {
 	echo "Stopping Banyan app"
 	killall Banyan
 }
+
 
 create_config
 download_extract

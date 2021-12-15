@@ -1,28 +1,38 @@
 # Run as administrator
 
-$APP_VERSION=$args[0]
-$INVITE_CODE=$args[1]
-$DEPLOY_KEY=$args[2]
+$INVITE_CODE=$args[0]
+$DEPLOYMENT_KEY=$args[1]
+$APP_VERSION=$args[2]
 
 $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 if (! $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Write-Error "This script must be run as Administrator"   
+    Write-Error "This script must be with admin privilege"   
     exit 1
-} else {
-    Write-Host "Installing app for user: $env:USERNAME"
 }
 
-if (!$APP_VERSION -or !$INVITE_CODE -or !$DEPLOY_KEY) {
+if (!$INVITE_CODE -or !$DEPLOYMENT_KEY) {
     Write-Host "Usage: "
-    Write-Host "$PSCommandPath <APP_VERSION> <INVITE_CODE> <DEPLOY_KEY>"   
+    Write-Host "$PSCommandPath <INVITE_CODE> <DEPLOYMENT_KEY> <APP_VERSION (optional>"   
     exit 1
-} else {
-    Write-Host "Installing app version: $APP_VERSION"
-    Write-Host "Installing with invite code: $INVITE_CODE"
-    Write-Host "Installing using deploy key: $DEPLOY_KEY"
 }
+
+if (!$APP_VERSION) {
+    Write-Host "Checking for latest version of app"
+    $res = Invoke-WebRequest "https://www.banyanops.com/app/windows/latest" -MaximumRedirection 0 -ErrorAction SilentlyContinue -UseBasicParsing
+    $loc = $res.Headers.Location
+    $match = select-string "Banyan-Setup-(.*).exe" -inputobject $loc
+    $APP_VERSION = $match.matches.groups[1].value
+}
+
+Write-Host "Installing with invite code: $INVITE_CODE"
+Write-Host "Installing using deploy key: $DEPLOYMENT_KEY"
+Write-Host "Installing app version: $APP_VERSION"
+
+$console_user = (Get-WMIObject -class Win32_ComputerSystem).username
+Write-Host "Installing app for user: $console_user"
 
 $global_profile_dir = "C:\ProgramData"
+
 
 function create_config() {
     Write-Host "Creating mdm-config json file"
@@ -61,6 +71,7 @@ function create_config() {
     Set-Content -Path $global_config_file -Value $json -NoNewLine
 }
 
+
 function download_extract() {
     Write-Host "Downloading installer EXE"    
 
@@ -83,11 +94,13 @@ function download_extract() {
     Start-Process -FilePath $dl_file -ArgumentList "/S" -Wait
 }
 
+
 function stage() {
     Write-Host "Running staged deployment"
-    Start-Process -FilePath "C:\Program Files\Banyan\Banyan.exe" -ArgumentList "--staged-deploy-key=$DEPLOY_KEY" -Wait
+    Start-Process -FilePath "C:\Program Files\Banyan\Banyan.exe" -ArgumentList "--staged-deploy-key=$DEPLOYMENT_KEY" -Wait
     Write-Host "Staged deployment done. Have the user start the Banyan app to complete registration."
 }
+
 
 function set_scheduled_task() {
     Write-Host "Creating ScheduledTask, so app launches upon user login"
@@ -105,8 +118,14 @@ function set_scheduled_task() {
     $taskFolder.RegisterTaskDefinition('Open Banyan', $Task , 6, 'Users', $null, 4)    
 }
 
+
 function start_app() {
-    Write-Host "Starting the Banyan app as current user; this function needs to be run as SYSTEM (not just Admin)"
+    Write-Host "Starting the Banyan app as current user"
+
+    if ([System.Environment]::UserName -ne "SYSTEM") {
+        Write-Host "Not running as SYSTEM; can't start Banyan app as current user"
+        return
+    }
 
     Install-Module RunAsUser -Force
 
@@ -124,10 +143,12 @@ function start_app() {
     Uninstall-Module RunAsUser -Force
 }
 
+
 function stop_app() {
     Write-Host "Stopping Banyan app"
     Stop-Process -Name Banyan -Force
 }
+
 
 create_config
 download_extract
