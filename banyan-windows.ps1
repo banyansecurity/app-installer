@@ -28,8 +28,8 @@ Write-Host "Installing with invite code: $INVITE_CODE"
 Write-Host "Installing using deploy key: $DEPLOYMENT_KEY"
 Write-Host "Installing app version: $APP_VERSION"
 
-$console_user = (Get-WMIObject -class Win32_ComputerSystem).username
-Write-Host "Installing app for user: $console_user"
+$logged_on_user = Get-WMIObject -class Win32_ComputerSystem | Select-Object -expand UserName
+Write-Host "Installing app for user: $logged_on_user"
 
 $global_profile_dir = "C:\ProgramData"
 
@@ -50,7 +50,7 @@ function create_config() {
         $ADJoinInfo = Get-ChildItem -path $intune_info
         $ADJoinInfo = $ADJoinInfo -replace "HKEY_LOCAL_MACHINE","HKLM:"
         $ADJoinUser = Get-ItemProperty -Path $ADJoinInfo
-        $intune_email = $User.UserEmail
+        $intune_email = $ADJoinUser.UserEmail
         $intune_user = $intune_email.Split("@")[0]
         Write-Host "Intune deployment - found user - $intune_email, $intune_user"
     }
@@ -90,7 +90,7 @@ function download_extract() {
         $progressPreference = 'Continue'
     }
 
-    # Install Application
+    # Install
     Start-Process -FilePath $dl_file -ArgumentList "/S" -Wait
 }
 
@@ -98,49 +98,24 @@ function download_extract() {
 function stage() {
     Write-Host "Running staged deployment"
     Start-Process -FilePath "C:\Program Files\Banyan\Banyan.exe" -ArgumentList "--staged-deploy-key=$DEPLOYMENT_KEY" -Wait
-    Write-Host "Staged deployment done. Have the user start the Banyan app to complete registration."
+    Write-Host "Staged deployment done. Have the logged_on_user start the Banyan app to complete registration."
 }
 
 
 function set_scheduled_task() {
-    Write-Host "Creating ScheduledTask, so app launches upon user login"
-    $ShedService = New-Object -comobject 'Schedule.Service'
-    $ShedService.Connect()
-    $Task = $ShedService.NewTask(0)
-    $Task.RegistrationInfo.Description = 'Opens Banyan at login for any user'
-    $Task.Settings.Enabled = $true
-    $Task.Settings.AllowDemandStart = $true
-    $trigger = $task.triggers.Create(9)
-    $trigger.Enabled = $true
-    $action = $Task.Actions.Create(0)
-    $action.Path = '"C:\Program Files\Banyan\Banyan.exe"'
-    $taskFolder = $ShedService.GetFolder("\")
-    $taskFolder.RegisterTaskDefinition('Open Banyan', $Task , 6, 'Users', $null, 4)    
+    Write-Host "Creating ScheduledTask for logged_on_user, so app launches upon next user login"    
+    $action = New-ScheduledTaskAction -Execute "C:\Program Files\Banyan\Banyan.exe"
+    $trigger = New-ScheduledTaskTrigger -AtLogOn
+    $principal = New-ScheduledTaskPrincipal -UserId $logged_on_user
+    $task = New-ScheduledTask -Action $action -Trigger $trigger -Principal $principal
+    Register-ScheduledTask StartBanyan -InputObject $task
 }
 
 
 function start_app() {
-    Write-Host "Starting the Banyan app as current user"
-
-    if ([System.Environment]::UserName -ne "SYSTEM") {
-        Write-Host "Not running as SYSTEM; can't start Banyan app as current user"
-        return
-    }
-
-    Install-Module RunAsUser -Force
-
-    $scriptblock = {
-        & 'C:\Program Files\Banyan\Banyan.exe'
-    }
-
-    try {
-        Invoke-AsCurrentUser -scriptblock $scriptblock
-    } catch {
-        Write-Warning "Couldn't start Banyan app"
-    }
-    sleep 10
-
-    Uninstall-Module RunAsUser -Force
+    Write-Host "Starting the Banyan app as logged_on_user"
+    Start-ScheduledTask -TaskName StartBanyan   
+    Start-Sleep -Seconds 5     
 }
 
 
