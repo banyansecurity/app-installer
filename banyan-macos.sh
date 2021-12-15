@@ -68,7 +68,7 @@ function create_config() {
 }
 
 
-function download_extract() {
+function download_install() {
 	echo "Downloading installer DMG"
 
 	arm_suffix=""
@@ -93,16 +93,16 @@ function download_extract() {
 		curl -sL "https://www.banyanops.com/app/releases/Banyan-${full_version}.dmg" -o "${dl_file}"
 	fi
 
-	# Mount DMG
+	# mount DMG
 	hdiutil attach "${dl_file}" -nobrowse
 
-	# Copy Banyan.app to Applications
+	# copy Banyan.app to Applications
 	ditto "/Volumes/Banyan ${full_version}/Banyan.app" "/Applications/Banyan.app"
 
-	# Set ownership to logged_on_user
+	# set ownership to logged_on_user
 	chown -R $logged_on_user /Applications/Banyan.app
 
-	# Unmount DMG
+	# unmount DMG
 	hdiutil detach "/Volumes/Banyan ${full_version}"
 }
 
@@ -114,7 +114,7 @@ function stage() {
 }
 
 
-function set_launch_agent() {
+function create_launch_agent() {
 	echo "Creating LaunchAgent, so app launches upon user login"
 	launch_xml='<?xml version="1.0" encoding="UTF-8"?>
 	<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -143,9 +143,15 @@ function set_launch_agent() {
 }
 
 
+function delete_launch_agent() {
+	echo "Deleting LaunchAgent"	
+	rm -f /Library/LaunchAgents/com.banyanapp.autoopen.plist
+}
+
+
 function start_app() {
-	echo "Starting the Banyan app as logged-on user"
-	su - "${logged_on_user}" -c 'open /Applications/Banyan.app'
+	echo "Starting the Banyan app as: $logged_on_user"
+	su -l "${logged_on_user}" -c 'open /Applications/Banyan.app'
 	sleep 5
 }
 
@@ -153,11 +159,20 @@ function start_app() {
 function stop_app() {
 	echo "Stopping Banyan app"
 	killall Banyan
+	sleep 2
 }
 
 
-create_config
-download_extract
-stage
-set_launch_agent
-start_app
+if [[ "$INVITE_CODE" = "upgrade" && "$DEPLOYMENT_KEY" = "upgrade" ]]; then
+	echo "Running upgrade flow"
+	stop_app
+	download_install
+	start_app
+else
+	echo "Running zero-touch install flow"
+	create_config
+	download_install
+	stage
+	start_app	
+fi
+

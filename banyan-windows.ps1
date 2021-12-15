@@ -74,7 +74,7 @@ function create_config() {
 }
 
 
-function download_extract() {
+function download_install() {
     Write-Host "Downloading installer EXE"    
 
     $tmp_dir_name = "banyantemp"
@@ -92,7 +92,7 @@ function download_extract() {
         $progressPreference = 'Continue'
     }
 
-    # Install
+    # run installer
     Start-Process -FilePath $dl_file -ArgumentList "/S" -Wait
 }
 
@@ -104,31 +104,50 @@ function stage() {
 }
 
 
-function set_scheduled_task() {
-    Write-Host "Creating ScheduledTask for logged_on_user, so app launches upon next user login"    
+function create_scheduled_task($task_name) {
+    Write-Host "Creating ScheduledTask $task_name for logged_on_user, so app launches upon next user login"    
     $action = New-ScheduledTaskAction -Execute "C:\Program Files\Banyan\Banyan.exe"
     $trigger = New-ScheduledTaskTrigger -AtLogOn
     $principal = New-ScheduledTaskPrincipal -UserId $logged_on_user
     $task = New-ScheduledTask -Action $action -Trigger $trigger -Principal $principal
-    Register-ScheduledTask StartBanyan -InputObject $task
+    Register-ScheduledTask $task_name -InputObject $task
 }
 
 
+function delete_scheduled_task($task_name) {
+    Write-Host "Deleting ScheduledTask $task_name"    
+    Unregister-ScheduledTask -TaskName $task_name -Confirm:$false
+}
+
+
+# since Windows doesn't have "su - username", we use scheduled_task to launch Banyan app as logged_on user
 function start_app() {
-    Write-Host "Starting the Banyan app as logged_on_user"
-    Start-ScheduledTask -TaskName StartBanyan   
-    Start-Sleep -Seconds 5     
+    Write-Host "Running ScheduledTask to start the Banyan app as: $logged_on_user"
+    $task_name = "StartBanyanTemp"
+    create_scheduled_task($task_name)
+    Start-ScheduledTask -TaskName $task_name   
+    Start-Sleep -Seconds 5
+    delete_scheduled_task($task_name)
 }
 
 
 function stop_app() {
     Write-Host "Stopping Banyan app"
     Stop-Process -Name Banyan -Force
+    Start-Sleep -Seconds 2
 }
 
 
-create_config
-download_extract
-stage
-set_scheduled_task
-start_app
+if (($INVITE_CODE -eq "upgrade") -and ($DEPLOYMENT_KEY -eq "upgrade")) {
+    Write-Host "Running upgrade flow"
+    stop_app
+    download_install
+    start_app
+} else {
+    Write-Host "Running zero-touch install flow"
+    create_config
+    download_install
+    stage
+    start_app    
+}
+
