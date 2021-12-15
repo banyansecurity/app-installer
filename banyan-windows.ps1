@@ -53,8 +53,8 @@ function create_config() {
         $ADJoinInfo = $ADJoinInfo -replace "HKEY_LOCAL_MACHINE","HKLM:"
         $ADJoinUser = Get-ItemProperty -Path $ADJoinInfo
         $deploy_email = $ADJoinUser.UserEmail
-        $deploy_user = $intune_email.Split("@")[0]
-        Write-Host "Intune deployment - found user - $intune_email, $intune_user"
+        $deploy_user = $deploy_email.Split("@")[0]
+        Write-Host "Intune deployment - found user - $deploy_email, $deploy_user"
     }
 
     $json = [pscustomobject]@{ 
