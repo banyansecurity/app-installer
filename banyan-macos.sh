@@ -78,9 +78,8 @@ function download_install() {
 	if [[ ${osvers_major} -ge 11 ]]; then
 	    processor=$(/usr/sbin/sysctl -n machdep.cpu.brand_string | grep -o "Intel")
 	    if [[ -z "$processor" ]]; then
-	    	echo "ARM proc"
-	    	# TODO: ARM version doesn't work w ZT ... need to debug 
-	    	# arm_suffix="-arm-arm64"
+	    	echo "Detected ARM processor"
+	    	arm_suffix="-arm-arm64"
 	    fi
 	fi
 
@@ -151,7 +150,7 @@ function delete_launch_agent() {
 
 function start_app() {
 	echo "Starting the Banyan app as: $logged_on_user"
-	su -l "${logged_on_user}" -c 'open /Applications/Banyan.app'
+	sudo -H -u "${logged_on_user}" open /Applications/Banyan.app
 	sleep 5
 }
 
