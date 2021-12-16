@@ -1,8 +1,8 @@
 #!/bin/bash
 
-INVITE_CODE="$4"
-DEPLOYMENT_KEY="$5"
-APP_VERSION="$6"
+INVITE_CODE="$1"
+DEPLOYMENT_KEY="$2"
+APP_VERSION="$3"
 
 if id -Gn $USER | grep -q -w -v admin; then
 	echo "This script must be run with admin privilege"
