@@ -4,7 +4,7 @@ INVITE_CODE="$4"
 DEPLOYMENT_KEY="$5"
 APP_VERSION="$6"
 
-if id -Gn $USER | grep -q -w -v admin; then
+if [[ $EUID -ne 0 ]]; then
 	echo "This script must be run with admin privilege"
 	exit 1
 fi
