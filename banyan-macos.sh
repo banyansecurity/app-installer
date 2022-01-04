@@ -40,12 +40,15 @@ function create_config() {
 	deploy_user=""
 	deploy_email=""
 
-    # get user and email from custom plist file deployed via Device Manager
-	# https://github.com/pbowden-msft/SignInHelper
-	if [[ -e "/Library/Managed Preferences/custom.plist" ]]; then
-		deploy_user=$( defaults read "/Library/Managed Preferences/custom.plist" name )
-		deploy_email=$( defaults read "/Library/Managed Preferences/custom.plist" email )	
-	fi
+	# contact Banyan Support to enable the feature that will allow you to issue 
+	# a device certificate for a specific user instead of the default **STAGED USER**
+	#
+    # you can get user and email via a custom plist file deployed via Device Manager
+	# or try one of these techniques: https://github.com/pbowden-msft/SignInHelper
+	#if [[ -e "/Library/Managed Preferences/custom.plist" ]]; then
+	#	deploy_user=$( defaults read "/Library/Managed Preferences/custom.plist" name )
+	#	deploy_email=$( defaults read "/Library/Managed Preferences/custom.plist" email )	
+	#fi
 
 	mdm_config_json='{
 		"mdm_invite_code": "REPLACE_WITH_INVITE_CODE",

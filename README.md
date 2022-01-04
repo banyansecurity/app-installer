@@ -33,7 +33,7 @@ Launch PowerShell as Administrator and run:
 ```
 
 
-## 2. Upgrade Flow
+## Upgrade Flow
 
 You can also use the scripts to upgrade the version of the Banyan app running on a device. Use the string `"upgrade"` for the Invite Code and Deployment Key parameters.
 

@@ -44,18 +44,20 @@ function create_config() {
     $deploy_user = ""
     $deploy_email = ""
 
-    # get user and email assuming device is joined to an Azure AD domain
-    # https://nerdymishka.com/articles/azure-ad-domain-join-registry-keys/
-    $intune_info = "HKLM:\SYSTEM\CurrentControlSet\Control\CloudDomainJoin\JoinInfo"
-    if (Test-Path $intune_info) {
-        Write-Host "Intune deployment - extracting user email"
-        $ADJoinInfo = Get-ChildItem -path $intune_info
-        $ADJoinInfo = $ADJoinInfo -replace "HKEY_LOCAL_MACHINE","HKLM:"
-        $ADJoinUser = Get-ItemProperty -Path $ADJoinInfo
-        $deploy_email = $ADJoinUser.UserEmail
-        $deploy_user = $deploy_email.Split("@")[0]
-        Write-Host "Intune deployment - found user - $deploy_email, $deploy_user"
-    }
+    # contact Banyan Support to enable the feature that will allow you to issue 
+    # a device certificate for a specific user instead of the default **STAGED USER**
+    #    
+    # you can get user and email assuming device is joined to an Azure AD domain: https://nerdymishka.com/articles/azure-ad-domain-join-registry-keys/
+    #$intune_info = "HKLM:\SYSTEM\CurrentControlSet\Control\CloudDomainJoin\JoinInfo"
+    #if (Test-Path $intune_info) {
+    #    Write-Host "Intune deployment - extracting user email"
+    #    $ADJoinInfo = Get-ChildItem -path $intune_info
+    #    $ADJoinInfo = $ADJoinInfo -replace "HKEY_LOCAL_MACHINE","HKLM:"
+    #    $ADJoinUser = Get-ItemProperty -Path $ADJoinInfo
+    #    $deploy_email = $ADJoinUser.UserEmail
+    #    $deploy_user = $deploy_email.Split("@")[0]
+    #    Write-Host "Intune deployment - found user - $deploy_email, $deploy_user"
+    #}
 
     $json = [pscustomobject]@{ 
         mdm_invite_code = $INVITE_CODE
