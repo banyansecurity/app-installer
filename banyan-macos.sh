@@ -51,16 +51,16 @@ function create_config() {
 	#fi
 
 	mdm_config_json='{
-		"mdm_invite_code": "REPLACE_WITH_INVITE_CODE",
-		"mdm_deploy_user": "REPLACE_WITH_USER",
-		"mdm_deploy_email": "REPLACE_WITH_EMAIL",
-		"mdm_device_ownership": "C",
-		"mdm_ca_certs_preinstalled": true,
-		"mdm_skip_cert_suppression": true,
-		"mdm_present": true,
-		"mdm_vendor_name": "JAMF",
-		"mdm_start_at_boot": true,
-		"mdm_hide_on_start": true	
+		"mdm_invite_code": "REPLACE_WITH_INVITE_CODE",      #Provide the Invite Code needed to register a device to your organization. Obtain from Banyan Command Center.
+		"mdm_deploy_user": "REPLACE_WITH_USER",             #Provide the name of the user this device should be registered to
+		"mdm_deploy_email": "REPLACE_WITH_EMAIL",           #Provide the email address of the user this device should be registered to
+		"mdm_device_ownership": "C",                        #Set device ownership type to one of the following: “C” for corporate-owned, “E” for employee-owned, “S” for corporate-shared, and “O” for other
+		"mdm_ca_certs_preinstalled": false,                 #Skip installation of Root and Intermediate CA certificates (because the Device Manager has already installed them)
+		"mdm_skip_cert_suppression": false,                 #Skip installation of scripts that suppress browser certificate prompts (because the Device Manager has already run them)
+		"mdm_present": true,                                #Inform Banyan that the device is managed by a Device Manager
+		"mdm_vendor_name": "JAMF",                          #Inform Banyan which Device Manager is managing the device
+		"mdm_start_at_boot": true,                          #Always launch Desktop App on device bootup
+		"mdm_hide_on_start": true	                    #Starts the Desktop App in a minimized state
 	}'
 
 	mkdir -p "$global_config_dir"
