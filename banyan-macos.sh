@@ -50,13 +50,16 @@ function create_config() {
 	#	deploy_email=$( defaults read "/Library/Managed Preferences/custom.plist" email )	
 	#fi
 
+	# the config below WILL NOT install your org's Banyan Private Root CA
+	# on MacOS, we recommend using your Device Manager to push down the Private Root CA
+
 	mdm_config_json='{
 		"mdm_invite_code": "REPLACE_WITH_INVITE_CODE",
 		"mdm_deploy_user": "REPLACE_WITH_USER",
 		"mdm_deploy_email": "REPLACE_WITH_EMAIL",
 		"mdm_device_ownership": "C",
 		"mdm_ca_certs_preinstalled": true,
-		"mdm_skip_cert_suppression": true,
+		"mdm_skip_cert_suppression": false,
 		"mdm_present": true,
 		"mdm_vendor_name": "JAMF",
 		"mdm_start_at_boot": true,

@@ -59,16 +59,20 @@ function create_config() {
     #    Write-Host "Intune deployment - found user - $deploy_email, $deploy_user"
     #}
 
+    # the config below WILL install your org's Banyan Private Root CA
+    # alternatively, you may use your Device Manager to push down the Private Root CA
+
     $json = [pscustomobject]@{ 
         mdm_invite_code = $INVITE_CODE
         mdm_deploy_user = $deploy_user
         mdm_deploy_email = $deploy_email 
         mdm_device_ownership = "C"
+        mdm_ca_certs_preinstalled = $false
+        mdm_skip_cert_suppression = $false
         mdm_present = $true
         mdm_vendor_name = "Intune"
         mdm_start_at_boot = $true
-        mdm_hide_on_start = $true  
-
+        mdm_hide_on_start = $true
     } | ConvertTo-Json
 
     New-Item -Path $global_profile_dir -Name $banyan_dir_name -ItemType "directory" -Force
