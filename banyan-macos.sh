@@ -60,7 +60,6 @@ function create_config() {
 		"mdm_device_ownership": "C",
 		"mdm_ca_certs_preinstalled": true,
 		"mdm_skip_cert_suppression": false,
-		"mdm_present": true,
 		"mdm_vendor_name": "JAMF",
 		"mdm_start_at_boot": true,
 		"mdm_hide_on_start": true	
