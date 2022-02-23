@@ -90,5 +90,6 @@ If you use [Workspace One UEM to distribute the Banyan Desktop App](https://docs
 
 ```
 mdm_present = $true
-mdm_vendor_udid =<DEVICE_UDID>
+mdm_vendor_udid = <DEVICE_UDID>
+mdm_vendor_name= "airwatch"
 ```
