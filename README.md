@@ -84,3 +84,13 @@ $DEPLOYMENT_KEY=<YOUR_DEPLOYMENT_KEY>
 $APP_VERSION=<YOUR_APP_VERSION (optional)>
 ```
 
+### VMWare Workspace One UEM
+
+If you use [Workspace One UEM to distribute the Banyan Desktop App](https://docs.banyanops.com/docs/feature-guides/manage-users-and-devices/device-managers/workspace-one-cert-api/#wsone), you need to set a few additional parameters in the `mdm-config.json` file so Banyan’s TrustScoring engine can correlate data from devices running the Banyan Desktop App with the data in Workspace ONE UEM:
+
+- `mdm_vendor_name` should be **Airwatch**
+- `mdm_present` should be **true**
+- `mdm_vendor_udid` should be the **DEVICE UDID**
+
+
+
