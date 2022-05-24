@@ -72,6 +72,22 @@ function create_config() {
 	sed -i '' "s/REPLACE_WITH_EMAIL/${deploy_email}/" "${global_config_file}"
 }
 
+function download_install_pkg() {
+	echo "Downloading installer PKG"
+
+	full_version="${APP_VERSION}"
+	dl_file="${tmp_dir}/Banyan-${full_version}.pkg"
+
+	if [[ -f "${dl_file}" ]]; then
+		echo "Installer PKG already downloaded"
+	else
+		curl -sL "https://www.banyanops.com/app/releases/Banyan-${full_version}.pkg" -o "${dl_file}"
+	fi
+
+    #Install PKG
+    sudo installer -pkg "${dl_file}" -target /
+    sleep 3
+}
 
 function download_install() {
 	echo "Downloading installer DMG"
@@ -114,42 +130,8 @@ function download_install() {
 function stage() {
 	echo "Running staged deployment"
 	/Applications/Banyan.app/Contents/MacOS/Banyan --staged-deploy-key=$DEPLOYMENT_KEY
+	sleep 3
 	echo "Staged deployment done. Have the user start the Banyan app to complete registration."
-}
-
-
-function create_launch_agent() {
-	echo "Creating LaunchAgent, so app launches upon user login"
-	launch_xml='<?xml version="1.0" encoding="UTF-8"?>
-	<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-	<plist version="1.0">
-	<dict>
-		<key>EnvironmentVariables</key>
-		<dict>
-			<key>PATH</key>
-			<string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/munki:/Library/Apple/usr/bin:/usr/local/sbin</string>
-		</dict>
-		<key>Label</key>
-		<string>com.banyanapp.autoopen</string>
-		<key>ProcessType</key>
-		<string>Interactive</string>
-		<key>ProgramArguments</key>
-		<array>
-			<string>/Applications/Banyan.app/Contents/MacOS/Banyan</string>
-		</array>
-		<key>RunAtLoad</key>
-		<true/>
-	</dict>
-	</plist>'
-
-	echo "$launch_xml" > /Library/LaunchAgents/com.banyanapp.autoopen.plist
-	chown root /Library/LaunchAgents/com.banyanapp.autoopen.plist
-}
-
-
-function delete_launch_agent() {
-	echo "Deleting LaunchAgent"	
-	rm -f /Library/LaunchAgents/com.banyanapp.autoopen.plist
 }
 
 
