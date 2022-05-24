@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 INVITE_CODE="$1"
 DEPLOYMENT_KEY="$2"
@@ -18,7 +19,7 @@ fi
 if [[ -z "$APP_VERSION" ]]; then
 	echo "Checking for latest version of app"
 	loc=$( curl -sI https://www.banyanops.com/app/macos/latest | awk '/Location:/ {print $2}' )
-	APP_VERSION=$( awk -F'Banyan-|.dmg' '{print $2}' <<< "$loc" )
+	APP_VERSION=$( awk -F'Banyan-|(.dmg|.pkg)' '{print $2}' <<< "$loc" )
 fi
 
 echo "Installing with invite code: $INVITE_CODE"
@@ -40,14 +41,14 @@ function create_config() {
 	deploy_user=""
 	deploy_email=""
 
-	# contact Banyan Support to enable the feature that will allow you to issue 
+	# contact Banyan Support to enable the feature that will allow you to issue
 	# a device certificate for a specific user instead of the default **STAGED USER**
 	#
     # you can get user and email via a custom plist file deployed via Device Manager
 	# or try one of these techniques: https://github.com/pbowden-msft/SignInHelper
 	#if [[ -e "/Library/Managed Preferences/custom.plist" ]]; then
 	#	deploy_user=$( defaults read "/Library/Managed Preferences/custom.plist" name )
-	#	deploy_email=$( defaults read "/Library/Managed Preferences/custom.plist" email )	
+	#	deploy_email=$( defaults read "/Library/Managed Preferences/custom.plist" email )
 	#fi
 
 	# the config below WILL NOT install your org's Banyan Private Root CA
@@ -62,7 +63,7 @@ function create_config() {
 		"mdm_skip_cert_suppression": false,
 		"mdm_vendor_name": "JAMF",
 		"mdm_start_at_boot": true,
-		"mdm_hide_on_start": true	
+		"mdm_hide_on_start": true
 	}'
 
 	mkdir -p "$global_config_dir"
@@ -148,17 +149,27 @@ function stop_app() {
 	sleep 2
 }
 
+##MAJOR_VER=$(echo $APP_VERSION |cut -c1)
+MAJOR_VER=${APP_VERSION:0:1}
+
+stop_app
 
 if [[ "$INVITE_CODE" = "upgrade" && "$DEPLOYMENT_KEY" = "upgrade" ]]; then
 	echo "Running upgrade flow"
-	stop_app
-	download_install
-	start_app
+	if [[ $MAJOR_VER -eq 2 ]]; then
+		download_install
+	else
+		download_install_pkg
+	fi
 else
 	echo "Running zero-touch install flow"
 	create_config
-	download_install
+	if [[$MAJOR_VER -eq 2  ]]; then
+		download_install
+	else
+		download_install_pkg
+	fi
 	stage
-	start_app	
 fi
 
+start_app
