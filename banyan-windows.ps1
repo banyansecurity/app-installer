@@ -6,13 +6,13 @@ $APP_VERSION=$args[2]
 
 $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 if (! $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Write-Error "This script must be with admin privilege"   
+    Write-Error "This script must be with admin privilege"
     exit 1
 }
 
 if (!$INVITE_CODE -or !$DEPLOYMENT_KEY) {
     Write-Host "Usage: "
-    Write-Host "$PSCommandPath <INVITE_CODE> <DEPLOYMENT_KEY> <APP_VERSION (optional>"   
+    Write-Host "$PSCommandPath <INVITE_CODE> <DEPLOYMENT_KEY> <APP_VERSION (optional>"
     exit 1
 }
 
@@ -44,9 +44,9 @@ function create_config() {
     $deploy_user = ""
     $deploy_email = ""
 
-    # contact Banyan Support to enable the feature that will allow you to issue 
+    # contact Banyan Support to enable the feature that will allow you to issue
     # a device certificate for a specific user instead of the default **STAGED USER**
-    #    
+    #
     # you can get user and email assuming device is joined to an Azure AD domain: https://nerdymishka.com/articles/azure-ad-domain-join-registry-keys/
     #$intune_info = "HKLM:\SYSTEM\CurrentControlSet\Control\CloudDomainJoin\JoinInfo"
     #if (Test-Path $intune_info) {
@@ -62,10 +62,10 @@ function create_config() {
     # the config below WILL install your org's Banyan Private Root CA
     # alternatively, you may use your Device Manager to push down the Private Root CA
 
-    $json = [pscustomobject]@{ 
+    $json = [pscustomobject]@{
         mdm_invite_code = $INVITE_CODE
         mdm_deploy_user = $deploy_user
-        mdm_deploy_email = $deploy_email 
+        mdm_deploy_email = $deploy_email
         mdm_device_ownership = "C"
         mdm_ca_certs_preinstalled = $false
         mdm_skip_cert_suppression = $false
@@ -80,7 +80,7 @@ function create_config() {
 
 
 function download_install() {
-    Write-Host "Downloading installer EXE"    
+    Write-Host "Downloading installer EXE"
 
     $tmp_dir_name = "banyantemp"
     $tmp_dir = $global_profile_dir + "\" + $tmp_dir_name
@@ -90,7 +90,7 @@ function download_install() {
     $dl_file = $tmp_dir + "\" + "Banyan-Setup-$APP_VERSION.exe"
 
     if (Test-Path $dl_file -PathType leaf) {
-        Write-Host "Installer EXE already downloaded"    
+        Write-Host "Installer EXE already downloaded"
     } else {
         $progressPreference = 'silentlyContinue'
         Invoke-Webrequest "https://www.banyanops.com/app/releases/Banyan-Setup-$APP_VERSION.exe" -outfile $dl_file -UseBasicParsing
@@ -108,9 +108,14 @@ function stage() {
     Write-Host "Staged deployment done. Have the logged_on_user start the Banyan app to complete registration."
 }
 
+function stage_v2() {
+    Write-Host "Running staged deployment v2"
+    Start-Process -FilePath "C:\Program Files\Banyan\resources\bin\banyanapp-admin.exe" -ArgumentList "--staged-deploy-key=$DEPLOYMENT_KEY" -Wait
+    Write-Host "Staged deployment done. Have the logged_on_user start the Banyan app to complete registration."
+}
 
 function create_scheduled_task($task_name) {
-    Write-Host "Creating ScheduledTask $task_name for logged_on_user, so app launches upon next user login"    
+    Write-Host "Creating ScheduledTask $task_name for logged_on_user, so app launches upon next user login"
     $action = New-ScheduledTaskAction -Execute "C:\Program Files\Banyan\Banyan.exe"
     $trigger = New-ScheduledTaskTrigger -AtLogOn
     $principal = New-ScheduledTaskPrincipal -UserId $logged_on_user
@@ -120,7 +125,7 @@ function create_scheduled_task($task_name) {
 
 
 function delete_scheduled_task($task_name) {
-    Write-Host "Deleting ScheduledTask $task_name"    
+    Write-Host "Deleting ScheduledTask $task_name"
     Unregister-ScheduledTask -TaskName $task_name -Confirm:$false
 }
 
@@ -130,7 +135,7 @@ function start_app() {
     Write-Host "Running ScheduledTask to start the Banyan app as: $logged_on_user"
     $task_name = "StartBanyanTemp"
     create_scheduled_task($task_name)
-    Start-ScheduledTask -TaskName $task_name   
+    Start-ScheduledTask -TaskName $task_name
     Start-Sleep -Seconds 5
     delete_scheduled_task($task_name)
 }
@@ -142,6 +147,7 @@ function stop_app() {
     Start-Sleep -Seconds 2
 }
 
+$MAJOR_VER= $APP_VERSION.substring(0,1)
 
 if (($INVITE_CODE -eq "upgrade") -and ($DEPLOYMENT_KEY -eq "upgrade")) {
     Write-Host "Running upgrade flow"
@@ -152,7 +158,10 @@ if (($INVITE_CODE -eq "upgrade") -and ($DEPLOYMENT_KEY -eq "upgrade")) {
     Write-Host "Running zero-touch install flow"
     create_config
     download_install
-    stage
-    start_app    
+    if ($MAJOR_VER -eq 2) {
+        stage
+    } else {
+        stage_v2
+    }
+    start_app
 }
-
