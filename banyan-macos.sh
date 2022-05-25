@@ -134,6 +134,13 @@ function stage() {
 	echo "Staged deployment done. Have the user start the Banyan app to complete registration."
 }
 
+function stage_v2() {
+	echo "Running staged deployment"
+	/Applications/Banyan.app/Contents/Resources/bin/banyanapp-admin stage --key=$DEPLOYMENT_KEY
+	sleep 3
+	echo "Staged deployment done. Have the user start the Banyan app to complete registration."
+}
+
 
 function start_app() {
 	echo "Starting the Banyan app as: $logged_on_user"
@@ -165,9 +172,10 @@ else
 	stop_app
 	if [[$MAJOR_VER -eq 2  ]]; then
 		download_install
+		stage
 	else
 		download_install_pkg
+		stage_v2
 	fi
-	stage
 	start_app
 fi
