@@ -1,5 +1,4 @@
 #!/bin/bash
-set -euo pipefail
 
 INVITE_CODE="$1"
 DEPLOYMENT_KEY="$2"
@@ -149,27 +148,26 @@ function stop_app() {
 	sleep 2
 }
 
-##MAJOR_VER=$(echo $APP_VERSION |cut -c1)
 MAJOR_VER=${APP_VERSION:0:1}
-
-stop_app
 
 if [[ "$INVITE_CODE" = "upgrade" && "$DEPLOYMENT_KEY" = "upgrade" ]]; then
 	echo "Running upgrade flow"
+	stop_app
 	if [[ $MAJOR_VER -eq 2 ]]; then
 		download_install
 	else
 		download_install_pkg
 	fi
+	start_app
 else
 	echo "Running zero-touch install flow"
 	create_config
+	stop_app
 	if [[$MAJOR_VER -eq 2  ]]; then
 		download_install
 	else
 		download_install_pkg
 	fi
 	stage
+	start_app
 fi
-
-start_app
