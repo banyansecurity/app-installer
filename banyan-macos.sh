@@ -170,7 +170,7 @@ else
 	echo "Running zero-touch install flow"
 	create_config
 	stop_app
-	if [[$MAJOR_VER -eq 2  ]]; then
+	if [[ $MAJOR_VER -eq 2  ]]; then
 		download_install
 		stage
 	else
