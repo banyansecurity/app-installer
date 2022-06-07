@@ -28,9 +28,10 @@ echo "Installing app version: $APP_VERSION"
 logged_on_user=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
 echo "Installing app for user: $logged_on_user"
 
-global_config_dir="/private/etc/banyanapp"
-tmp_dir="/tmp"
+global_config_dir="/etc/banyanapp"
+tmp_dir="/etc/banyanapp/tmp"
 
+mkdir -p "$tmp_dir"
 
 function create_config() {
 	echo "Creating mdm-config json file"
@@ -58,14 +59,13 @@ function create_config() {
 		"mdm_deploy_user": "REPLACE_WITH_USER",
 		"mdm_deploy_email": "REPLACE_WITH_EMAIL",
 		"mdm_device_ownership": "C",
-		"mdm_ca_certs_preinstalled": true,
+		"mdm_ca_certs_preinstalled": false,
 		"mdm_skip_cert_suppression": false,
 		"mdm_vendor_name": "JAMF",
 		"mdm_start_at_boot": true,
 		"mdm_hide_on_start": true
 	}'
 
-	mkdir -p "$global_config_dir"
 	echo "$mdm_config_json" > "${global_config_file}"
 	sed -i '' "s/REPLACE_WITH_INVITE_CODE/${INVITE_CODE}/" "${global_config_file}"
 	sed -i '' "s/REPLACE_WITH_USER/${deploy_user}/" "${global_config_file}"
