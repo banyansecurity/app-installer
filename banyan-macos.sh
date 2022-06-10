@@ -17,7 +17,7 @@ fi
 
 if [[ -z "$APP_VERSION" ]]; then
 	echo "Checking for latest version of app"
-	loc=$( curl -sI https://www.banyanops.com/app/macos/latest | awk '/Location:/ {print $2}' )
+	loc=$( curl -sI https://www.banyanops.com/app/macos/v3/latest | awk '/Location:/ {print $2}' )
 	APP_VERSION=$( awk -F'Banyan-|.pkg' '{print $2}' <<< "$loc" )
 fi
 
