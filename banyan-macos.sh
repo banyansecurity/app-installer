@@ -18,7 +18,7 @@ fi
 if [[ -z "$APP_VERSION" ]]; then
 	echo "Checking for latest version of app"
 	loc=$( curl -sI https://www.banyanops.com/app/macos/latest | awk '/Location:/ {print $2}' )
-	APP_VERSION=$( awk -F'Banyan-|.dmg' '{print $2}' <<< "$loc" )
+	APP_VERSION=$( awk -F'Banyan-|.pkg' '{print $2}' <<< "$loc" )
 fi
 
 echo "Installing with invite code: $INVITE_CODE"
@@ -28,9 +28,10 @@ echo "Installing app version: $APP_VERSION"
 logged_on_user=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
 echo "Installing app for user: $logged_on_user"
 
-global_config_dir="/private/etc/banyanapp"
-tmp_dir="/tmp"
+global_config_dir="/etc/banyanapp"
+tmp_dir="/etc/banyanapp/tmp"
 
+mkdir -p "$tmp_dir"
 
 function create_config() {
 	echo "Creating mdm-config json file"
@@ -40,14 +41,14 @@ function create_config() {
 	deploy_user=""
 	deploy_email=""
 
-	# contact Banyan Support to enable the feature that will allow you to issue 
+	# contact Banyan Support to enable the feature that will allow you to issue
 	# a device certificate for a specific user instead of the default **STAGED USER**
 	#
     # you can get user and email via a custom plist file deployed via Device Manager
 	# or try one of these techniques: https://github.com/pbowden-msft/SignInHelper
 	#if [[ -e "/Library/Managed Preferences/custom.plist" ]]; then
 	#	deploy_user=$( defaults read "/Library/Managed Preferences/custom.plist" name )
-	#	deploy_email=$( defaults read "/Library/Managed Preferences/custom.plist" email )	
+	#	deploy_email=$( defaults read "/Library/Managed Preferences/custom.plist" email )
 	#fi
 
 	# the config below WILL NOT install your org's Banyan Private Root CA
@@ -58,98 +59,42 @@ function create_config() {
 		"mdm_deploy_user": "REPLACE_WITH_USER",
 		"mdm_deploy_email": "REPLACE_WITH_EMAIL",
 		"mdm_device_ownership": "C",
-		"mdm_ca_certs_preinstalled": true,
+		"mdm_ca_certs_preinstalled": false,
 		"mdm_skip_cert_suppression": false,
-		"mdm_vendor_name": "JAMF",
+		"mdm_hide_services": false,
+		"mdm_disable_quit": false,
 		"mdm_start_at_boot": true,
-		"mdm_hide_on_start": true	
+		"mdm_hide_on_start": true
 	}'
 
-	mkdir -p "$global_config_dir"
 	echo "$mdm_config_json" > "${global_config_file}"
 	sed -i '' "s/REPLACE_WITH_INVITE_CODE/${INVITE_CODE}/" "${global_config_file}"
 	sed -i '' "s/REPLACE_WITH_USER/${deploy_user}/" "${global_config_file}"
 	sed -i '' "s/REPLACE_WITH_EMAIL/${deploy_email}/" "${global_config_file}"
 }
 
-
 function download_install() {
-	echo "Downloading installer DMG"
+	echo "Downloading installer PKG"
 
-	arm_suffix=""
-
-	# check to see if the Mac is Intel or M1
-	IFS='.' read osvers_major osvers_minor osvers_dot_version <<< "$(/usr/bin/sw_vers -productVersion)"
-	if [[ ${osvers_major} -ge 11 ]]; then
-	    processor=$(/usr/sbin/sysctl -n machdep.cpu.brand_string | grep -o "Intel")
-	    if [[ -z "$processor" ]]; then
-	    	echo "Detected ARM processor"
-	    	arm_suffix="-arm-arm64"
-	    fi
-	fi
-
-	full_version="${APP_VERSION}${arm_suffix}"
-	dl_file="${tmp_dir}/Banyan-${full_version}.dmg"
+	full_version="${APP_VERSION}"
+	dl_file="${tmp_dir}/Banyan-${full_version}.pkg"
 
 	if [[ -f "${dl_file}" ]]; then
-		echo "Installer DMG already downloaded"
+		echo "Installer PKG already downloaded"
 	else
-		curl -sL "https://www.banyanops.com/app/releases/Banyan-${full_version}.dmg" -o "${dl_file}"
+		curl -sL "https://www.banyanops.com/app/releases/Banyan-${full_version}.pkg" -o "${dl_file}"
 	fi
 
-	# mount DMG
-	hdiutil attach "${dl_file}" -nobrowse
-
-	# copy Banyan.app to Applications
-	ditto "/Volumes/Banyan ${full_version}/Banyan.app" "/Applications/Banyan.app"
-
-	# set ownership to logged_on_user
-	chown -R $logged_on_user /Applications/Banyan.app
-
-	# unmount DMG
-	hdiutil detach "/Volumes/Banyan ${full_version}"
+    #Install PKG
+    sudo installer -pkg "${dl_file}" -target /
+    sleep 3
 }
-
 
 function stage() {
 	echo "Running staged deployment"
-	/Applications/Banyan.app/Contents/MacOS/Banyan --staged-deploy-key=$DEPLOYMENT_KEY
+	/Applications/Banyan.app/Contents/Resources/bin/banyanapp-admin stage --key=$DEPLOYMENT_KEY
+	sleep 3
 	echo "Staged deployment done. Have the user start the Banyan app to complete registration."
-}
-
-
-function create_launch_agent() {
-	echo "Creating LaunchAgent, so app launches upon user login"
-	launch_xml='<?xml version="1.0" encoding="UTF-8"?>
-	<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-	<plist version="1.0">
-	<dict>
-		<key>EnvironmentVariables</key>
-		<dict>
-			<key>PATH</key>
-			<string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/munki:/Library/Apple/usr/bin:/usr/local/sbin</string>
-		</dict>
-		<key>Label</key>
-		<string>com.banyanapp.autoopen</string>
-		<key>ProcessType</key>
-		<string>Interactive</string>
-		<key>ProgramArguments</key>
-		<array>
-			<string>/Applications/Banyan.app/Contents/MacOS/Banyan</string>
-		</array>
-		<key>RunAtLoad</key>
-		<true/>
-	</dict>
-	</plist>'
-
-	echo "$launch_xml" > /Library/LaunchAgents/com.banyanapp.autoopen.plist
-	chown root /Library/LaunchAgents/com.banyanapp.autoopen.plist
-}
-
-
-function delete_launch_agent() {
-	echo "Deleting LaunchAgent"	
-	rm -f /Library/LaunchAgents/com.banyanapp.autoopen.plist
 }
 
 
@@ -159,13 +104,11 @@ function start_app() {
 	sleep 5
 }
 
-
 function stop_app() {
 	echo "Stopping Banyan app"
 	killall Banyan
 	sleep 2
 }
-
 
 if [[ "$INVITE_CODE" = "upgrade" && "$DEPLOYMENT_KEY" = "upgrade" ]]; then
 	echo "Running upgrade flow"
@@ -175,8 +118,8 @@ if [[ "$INVITE_CODE" = "upgrade" && "$DEPLOYMENT_KEY" = "upgrade" ]]; then
 else
 	echo "Running zero-touch install flow"
 	create_config
+	stop_app
 	download_install
 	stage
-	start_app	
+	start_app
 fi
-
