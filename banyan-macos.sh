@@ -33,27 +33,31 @@ tmp_dir="/etc/banyanapp/tmp"
 
 mkdir -p "$tmp_dir"
 
+
+MY_USER=""
+MY_EMAIL=""
+function get_user_email() {
+    # assumes user and email are set in a custom plist file deployed via Device Manager
+    # (you may instead use a different technique, like: https://github.com/pbowden-msft/SignInHelper) 
+    if [[ -e "/Library/Managed Preferences/userinfo.plist" ]]; then
+        echo "userinfo.plist - extracting user email"
+        MY_USER=$( defaults read "/Library/Managed Preferences/userinfo.plist" name )
+        MY_EMAIL=$( defaults read "/Library/Managed Preferences/userinfo.plist" email )
+    fi
+    echo "Installing for user with name: $MY_USER"
+    echo "Installing for user with email: $MY_EMAIL"
+    if [[ -z "$MY_EMAIL" ]]; then
+        echo "No user specified - device certificate will be issued to the default **STAGED USER**"
+    fi    
+}
+
+
 function create_config() {
     echo "Creating mdm-config json file"
-
     global_config_file="${global_config_dir}/mdm-config.json"
-
-    deploy_user=""
-    deploy_email=""
-
-    # contact Banyan Support to enable the feature that will allow you to issue
-    # a device certificate for a specific user instead of the default **STAGED USER**
-    #
-    # you can get user and email via a custom plist file deployed via Device Manager
-    # or try one of these techniques: https://github.com/pbowden-msft/SignInHelper
-    #if [[ -e "/Library/Managed Preferences/custom.plist" ]]; then
-    #   deploy_user=$( defaults read "/Library/Managed Preferences/custom.plist" name )
-    #   deploy_email=$( defaults read "/Library/Managed Preferences/custom.plist" email )
-    #fi
 
     # the config below WILL install your org's Banyan Private Root CA
     # alternatively, you may use your Device Manager to push down the Private Root CA
-
     mdm_config_json='{
         "mdm_invite_code": "REPLACE_WITH_INVITE_CODE",
         "mdm_deploy_user": "REPLACE_WITH_USER",
@@ -61,6 +65,7 @@ function create_config() {
         "mdm_device_ownership": "C",
         "mdm_ca_certs_preinstalled": false,
         "mdm_skip_cert_suppression": false,
+        "mdm_vendor_name": "Jamf",        
         "mdm_hide_services": false,
         "mdm_disable_quit": false,
         "mdm_start_at_boot": true,
@@ -69,9 +74,10 @@ function create_config() {
 
     echo "$mdm_config_json" > "${global_config_file}"
     sed -i '' "s/REPLACE_WITH_INVITE_CODE/${INVITE_CODE}/" "${global_config_file}"
-    sed -i '' "s/REPLACE_WITH_USER/${deploy_user}/" "${global_config_file}"
-    sed -i '' "s/REPLACE_WITH_EMAIL/${deploy_email}/" "${global_config_file}"
+    sed -i '' "s/REPLACE_WITH_USER/${MY_USER}/" "${global_config_file}"
+    sed -i '' "s/REPLACE_WITH_EMAIL/${MY_EMAIL}/" "${global_config_file}"
 }
+
 
 function download_install() {
     echo "Downloading installer PKG"
@@ -85,10 +91,11 @@ function download_install() {
         curl -sL "https://www.banyanops.com/app/releases/Banyan-${full_version}.pkg" -o "${dl_file}"
     fi
 
-    # install PKG
+    echo "Run installer"
     sudo installer -pkg "${dl_file}" -target /
     sleep 3
 }
+
 
 function stage() {
     echo "Running staged deployment"
@@ -104,11 +111,13 @@ function start_app() {
     sleep 5
 }
 
+
 function stop_app() {
     echo "Stopping Banyan app"
     killall Banyan
     sleep 2
 }
+
 
 if [[ "$INVITE_CODE" = "upgrade" && "$DEPLOYMENT_KEY" = "upgrade" ]]; then
     echo "Running upgrade flow"
@@ -118,6 +127,7 @@ if [[ "$INVITE_CODE" = "upgrade" && "$DEPLOYMENT_KEY" = "upgrade" ]]; then
 else
     echo "Running zero-touch install flow"
     stop_app
+    get_user_email
     create_config   
     download_install
     stage
