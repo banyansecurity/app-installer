@@ -25,7 +25,7 @@ if (!$APP_VERSION) {
 }
 
 Write-Host "Installing with invite code: $INVITE_CODE"
-Write-Host "Installing using deploy key: $DEPLOYMENT_KEY"
+Write-Host "Installing using deploy key: *****"
 Write-Host "Installing app version: $APP_VERSION"
 
 $logged_on_user = Get-WMIObject -class Win32_ComputerSystem | Select-Object -expand UserName
@@ -99,11 +99,13 @@ function download_install() {
 
     # run installer
     Start-Process -FilePath $dl_file -ArgumentList "/S" -Wait
+    Start-Sleep -Seconds 3    
 }
 
 function stage() {
-    Write-Host "Running staged deployment v2"
+    Write-Host "Running staged deployment"
     Start-Process -FilePath "C:\Program Files\Banyan\resources\bin\banyanapp-admin.exe" -ArgumentList "stage --key=$DEPLOYMENT_KEY" -Wait
+    Start-Sleep -Seconds 3    
     Write-Host "Staged deployment done. Have the logged_on_user start the Banyan app to complete registration."
 }
 
@@ -147,8 +149,10 @@ if (($INVITE_CODE -eq "upgrade") -and ($DEPLOYMENT_KEY -eq "upgrade")) {
     start_app
 } else {
     Write-Host "Running zero-touch install flow"
+    stop_app
     create_config
     download_install
     stage
+    create_config
     start_app
 }
