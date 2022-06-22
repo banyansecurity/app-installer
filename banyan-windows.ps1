@@ -34,8 +34,8 @@ Write-Host "Installing app for user: $logged_on_user"
 $global_profile_dir = "C:\ProgramData"
 
 
-$MY_USER=""
-$MY_EMAIL=""
+$MY_USER = ""
+$MY_EMAIL = ""
 function get_user_email() {
     # assumes you can get user and email because device is joined to an Azure AD domain: https://nerdymishka.com/articles/azure-ad-domain-join-registry-keys/
     # (you may use other techniques here as well)
@@ -45,8 +45,8 @@ function get_user_email() {
         $ADJoinInfo = Get-ChildItem -path $intune_info
         $ADJoinInfo = $ADJoinInfo -replace "HKEY_LOCAL_MACHINE","HKLM:"
         $ADJoinUser = Get-ItemProperty -Path $ADJoinInfo
-        $MY_EMAIL = $ADJoinUser.UserEmail
-        $MY_USER = $deploy_email.Split("@")[0]
+        $script:MY_EMAIL = $ADJoinUser.UserEmail
+        $script:MY_USER = $MY_EMAIL.Split("@")[0]
     }
     Write-Host "Installing for user with name: $MY_USER"
     Write-Host "Installing for user with email: $MY_EMAIL"
@@ -54,6 +54,7 @@ function get_user_email() {
         Write-Host "No user specified - device certificate will be issued to the default **STAGED USER**"
     }
 }
+
 
 
 function create_config() {
@@ -74,7 +75,7 @@ function create_config() {
         mdm_skip_cert_suppression = $false
         mdm_vendor_name = "Intune"
         mdm_hide_services = $false
-        mdm_disable_quit = $false        
+        mdm_disable_quit = $false
         mdm_start_at_boot = $true
         mdm_hide_on_start = $false
     } | ConvertTo-Json
@@ -104,14 +105,14 @@ function download_install() {
 
     Write-Host "Run installer"
     Start-Process -FilePath $dl_file -ArgumentList "/S" -Wait
-    Start-Sleep -Seconds 3    
+    Start-Sleep -Seconds 3
 }
 
 
 function stage() {
     Write-Host "Running staged deployment"
     Start-Process -FilePath "C:\Program Files\Banyan\resources\bin\banyanapp-admin.exe" -ArgumentList "stage --key=$DEPLOYMENT_KEY" -Wait
-    Start-Sleep -Seconds 3    
+    Start-Sleep -Seconds 3
     Write-Host "Staged deployment done. Have the logged_on_user start the Banyan app to complete registration."
 }
 
