@@ -38,17 +38,17 @@ MY_USER=""
 MY_EMAIL=""
 function get_user_email() {
     # assumes user and email are set in a custom plist file deployed via Device Manager
-    # (you may instead use a different technique, like: https://github.com/pbowden-msft/SignInHelper) 
+    # (you may instead use a different technique, like: https://github.com/pbowden-msft/SignInHelper)
     if [[ -e "/Library/Managed Preferences/userinfo.plist" ]]; then
         echo "userinfo.plist - extracting user email"
-        MY_USER=$( defaults read "/Library/Managed Preferences/userinfo.plist" name )
-        MY_EMAIL=$( defaults read "/Library/Managed Preferences/userinfo.plist" email )
+        MY_USER=$( defaults read "/Library/Managed Preferences/userinfo.plist" deploy_user )
+        MY_EMAIL=$( defaults read "/Library/Managed Preferences/userinfo.plist" deploy_email )
     fi
     echo "Installing for user with name: $MY_USER"
     echo "Installing for user with email: $MY_EMAIL"
     if [[ -z "$MY_EMAIL" ]]; then
         echo "No user specified - device certificate will be issued to the default **STAGED USER**"
-    fi    
+    fi
 }
 
 
@@ -65,7 +65,7 @@ function create_config() {
         "mdm_device_ownership": "C",
         "mdm_ca_certs_preinstalled": false,
         "mdm_skip_cert_suppression": false,
-        "mdm_vendor_name": "Jamf",        
+        "mdm_vendor_name": "Jamf",
         "mdm_hide_services": false,
         "mdm_disable_quit": false,
         "mdm_start_at_boot": true,
@@ -128,7 +128,7 @@ else
     echo "Running zero-touch install flow"
     stop_app
     get_user_email
-    create_config   
+    create_config
     download_install
     stage
     create_config
