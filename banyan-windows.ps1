@@ -78,6 +78,7 @@ function create_config() {
         mdm_disable_quit = $false
         mdm_start_at_boot = $true
         mdm_hide_on_start = $true
+        mdm_disable_auto_update = $false
     } | ConvertTo-Json
 
     New-Item -Path $global_profile_dir -Name $banyan_dir_name -ItemType "directory" -Force | Out-Null
