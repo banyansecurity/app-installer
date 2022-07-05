@@ -69,7 +69,8 @@ function create_config() {
         "mdm_hide_services": false,
         "mdm_disable_quit": false,
         "mdm_start_at_boot": true,
-        "mdm_hide_on_start": false
+        "mdm_hide_on_start": false,
+        "mdm_disable_auto_update": false
     }'
 
     echo "$mdm_config_json" > "${global_config_file}"
