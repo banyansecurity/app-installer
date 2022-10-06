@@ -1,8 +1,33 @@
+################################################################################
+#Banyan Zero Touch Installation
+#Please confirm or update the following variables prior to installing the script
 # Run as administrator
+
+#Deployment Information
 
 $INVITE_CODE=$args[0]
 $DEPLOYMENT_KEY=$args[1]
 $APP_VERSION=$args[2]
+
+#Device Registration and Banyan App Configuration
+
+DEVICE_OWNERSHIP="C"
+CA_CERTS_PREINSTALLED= false
+SKIP_CERT_SUPPRESSION= false
+VENDOR_NAME="Intune"
+HIDE_SERVICES= false
+DISABLE_QUIT= false
+START_AT_BOOT= true
+HIDE_ON_START= false
+
+#User Information
+
+MULTI_USER= false
+
+# Run as administrator
+
+################################################################################
+
 
 $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 if (! $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
@@ -70,14 +95,14 @@ function create_config() {
         mdm_invite_code = $INVITE_CODE
         mdm_deploy_user = $MY_USER
         mdm_deploy_email = $MY_EMAIL
-        mdm_device_ownership = "C"
-        mdm_ca_certs_preinstalled = $true
-        mdm_skip_cert_suppression = $false
-        mdm_vendor_name = "Intune"
-        mdm_hide_services = $false
-        mdm_disable_quit = $false
-        mdm_start_at_boot = $true
-        mdm_hide_on_start = $true
+        mdm_device_ownership = $DEVICE_OWNERSHIP
+        mdm_ca_certs_preinstalled = $CA_CERTS_PREINSTALLED
+        mdm_skip_cert_suppression = $SKIP_CERT_SUPPRESSION
+        mdm_vendor_name = $VENDOR_NAME
+        mdm_hide_services = $HIDE_SERVICES
+        mdm_disable_quit = $DISABLE_QUIT
+        mdm_start_at_boot = $START_AT_BOOT
+        mdm_hide_on_start = $HIDE_ON_START
     } | ConvertTo-Json
 
     New-Item -Path $global_profile_dir -Name $banyan_dir_name -ItemType "directory" -Force | Out-Null

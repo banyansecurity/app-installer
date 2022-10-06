@@ -1,8 +1,34 @@
 #!/bin/bash
+################################################################################
+#Banyan Zero Touch Installation
+#Please confirm or update the following variables prior to installing the script
+
+#Deployment Information
 
 INVITE_CODE="$1"
 DEPLOYMENT_KEY="$2"
 APP_VERSION="$3"
+
+#Device Registration and Banyan App Configuration
+
+DEVICE_OWNERSHIP="C"
+CA_CERTS_PREINSTALLED= false
+SKIP_CERT_SUPPRESSION= false
+VENDOR_NAME="Jamf"
+HIDE_SERVICES= false
+DISABLE_QUIT= false
+START_AT_BOOT= true
+HIDE_ON_START= false
+
+#User Information
+
+USER_INFO_PATH=
+USER_INFO_VARIABLE=
+USER_INFO_EMAIL_VARIABLE=
+MULTI_USER= false
+
+
+################################################################################
 
 if [[ $EUID -ne 0 ]]; then
     echo "This script must be run with admin privilege"
@@ -41,8 +67,8 @@ function get_user_email() {
     # (you may instead use a different technique, like: https://github.com/pbowden-msft/SignInHelper)
     if [[ -e "/Library/Managed Preferences/userinfo.plist" ]]; then
         echo "userinfo.plist - extracting user email"
-        MY_USER=$( defaults read "/Library/Managed Preferences/userinfo.plist" deploy_user )
-        MY_EMAIL=$( defaults read "/Library/Managed Preferences/userinfo.plist" deploy_email )
+        MY_USER=$( defaults read "$USER_INFO_PATH" $USER_INFO_VARIABLE )
+        MY_EMAIL=$( defaults read "$USER_INFO_PATH" $USER_INFO_EMAIL_VARIABLE )
     fi
     echo "Installing for user with name: $MY_USER"
     echo "Installing for user with email: $MY_EMAIL"
@@ -62,20 +88,28 @@ function create_config() {
         "mdm_invite_code": "REPLACE_WITH_INVITE_CODE",
         "mdm_deploy_user": "REPLACE_WITH_USER",
         "mdm_deploy_email": "REPLACE_WITH_EMAIL",
-        "mdm_device_ownership": "C",
-        "mdm_ca_certs_preinstalled": false,
-        "mdm_skip_cert_suppression": false,
-        "mdm_vendor_name": "Jamf",
-        "mdm_hide_services": false,
-        "mdm_disable_quit": false,
-        "mdm_start_at_boot": true,
-        "mdm_hide_on_start": false
+        "mdm_device_ownership": "REPLACE_WITH_DEVICE_OWNERSHIP",
+        "mdm_ca_certs_preinstalled": "REPLACE_WITH_CA_CERTS_PREINSTALLED",
+        "mdm_skip_cert_suppression": "REPLACE_WITH_SKIP_CERT_SUPPRESSION",
+        "mdm_vendor_name": "REPLACE_WITH_VENDOR_NAME",
+        "mdm_hide_services": "REPLACE_WITH_HIDE_SERVICES",
+        "mdm_disable_quit": "REPLACE_WITH_DISABLE_QUIT",
+        "mdm_start_at_boot": "REPLACE_WITH_START_AT_BOOT",
+        "mdm_hide_on_start": "REPLACE_WITHSTART_AT_BOOT"
     }'
 
     echo "$mdm_config_json" > "${global_config_file}"
     sed -i '' "s/REPLACE_WITH_INVITE_CODE/${INVITE_CODE}/" "${global_config_file}"
     sed -i '' "s/REPLACE_WITH_USER/${MY_USER}/" "${global_config_file}"
     sed -i '' "s/REPLACE_WITH_EMAIL/${MY_EMAIL}/" "${global_config_file}"
+    sed -i '' "s/REPLACE_WITH_DEVICE_OWNERSHIP/${DEVICE_OWNERSHIP}/" "${global_config_file}"
+    sed -i '' "s/REPLACE_WITH_CA_CERTS_PREINSTALLED/${CA_CERTS_PREINSTALLED}/" "${global_config_file}"
+    sed -i '' "s/REPLACE_WITH_SKIP_CERT_SUPPRESSION/${SKIP_CERT_SUPPRESSION}/" "${global_config_file}"
+    sed -i '' "s/REPLACE_WITH_VENDOR_NAME/${VENDOR_NAME}/" "${global_config_file}"
+    sed -i '' "s/REPLACE_WITH_HIDE_SERVICES/${HIDE_SERVICES}/" "${global_config_file}"
+    sed -i '' "s/REPLACE_WWITH_DISABLE_QUIT/${DISABLE_QUIT}/" "${global_config_file}"
+    sed -i '' "s/REPLACE_WITH_START_AT_BOOT/${START_AT_BOOT}/" "${global_config_file}"
+    sed -i '' "s/REPLACE_WITH_START_AT_BOOT/${HIDE_ON_START}/" "${global_config_file}"
 }
 
 
