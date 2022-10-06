@@ -1,32 +1,31 @@
 #!/bin/bash
-################################################################################
-#Banyan Zero Touch Installation
-#Please confirm or update the following variables prior to installing the script
 
-#Deployment Information
+################################################################################
+# Banyan Zero Touch Installation
+# Confirm or update the following variables prior to running the script
+
+# Deployment Information
 
 INVITE_CODE="$1"
 DEPLOYMENT_KEY="$2"
 APP_VERSION="$3"
 
-#Device Registration and Banyan App Configuration
+# Device Registration and Banyan App Configuration
 
-DEVICE_OWNERSHIP="C"
-CA_CERTS_PREINSTALLED= false
-SKIP_CERT_SUPPRESSION= false
-VENDOR_NAME="Jamf"
-HIDE_SERVICES= false
-DISABLE_QUIT= false
-START_AT_BOOT= true
-HIDE_ON_START= false
+DEVICE_OWNERSHIP="S"
+CA_CERTS_PREINSTALLED=false
+SKIP_CERT_SUPPRESSION=false
+VENDOR_NAME=""
+HIDE_SERVICES=false
+DISABLE_QUIT=false
+START_AT_BOOT=true
+HIDE_ON_START=true
 
-#User Information
-
-USER_INFO_PATH=
-USER_INFO_VARIABLE=
-USER_INFO_EMAIL_VARIABLE=
-MULTI_USER= false
-
+# User Information for Device Certificate
+MULTI_USER=true
+USERINFO_PATH=""
+USERINFO_USER_VAR=""
+USERINFO_EMAIL_VAR=""
 
 ################################################################################
 
@@ -63,13 +62,16 @@ mkdir -p "$tmp_dir"
 MY_USER=""
 MY_EMAIL=""
 function get_user_email() {
-    # assumes user and email are set in a custom plist file deployed via Device Manager
-    # (you may instead use a different technique, like: https://github.com/pbowden-msft/SignInHelper)
-    if [[ -e "/Library/Managed Preferences/userinfo.plist" ]]; then
-        echo "userinfo.plist - extracting user email"
-        MY_USER=$( defaults read "$USER_INFO_PATH" $USER_INFO_VARIABLE )
-        MY_EMAIL=$( defaults read "$USER_INFO_PATH" $USER_INFO_EMAIL_VARIABLE )
+    if [[ "$MULTI_USER" = false ]]
+        # assumes user and email are set in a custom plist file deployed via Device Manager
+        # (you may instead use a different technique, like: https://github.com/pbowden-msft/SignInHelper)
+        if [[ -e "$USERINFO_PATH" ]]; then
+            echo "Extracting user email from: $USERINFO_PATH"
+            MY_USER=$( defaults read "${USERINFO_PATH}" "${USERINFO_USER_VAR}" )
+            MY_EMAIL=$( defaults read "${USERINFO_PATH}" "${USERINFO_EMAIL_VAR}" )
+        fi
     fi
+
     echo "Installing for user with name: $MY_USER"
     echo "Installing for user with email: $MY_EMAIL"
     if [[ -z "$MY_EMAIL" ]]; then

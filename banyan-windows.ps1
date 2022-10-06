@@ -1,30 +1,31 @@
-################################################################################
-#Banyan Zero Touch Installation
-#Please confirm or update the following variables prior to installing the script
 # Run as administrator
 
-#Deployment Information
+################################################################################
+# Banyan Zero Touch Installation
+# Confirm or update the following variables prior to running the script
+
+# Deployment Information
 
 $INVITE_CODE=$args[0]
 $DEPLOYMENT_KEY=$args[1]
 $APP_VERSION=$args[2]
 
-#Device Registration and Banyan App Configuration
+# Device Registration and Banyan App Configuration
 
-DEVICE_OWNERSHIP="C"
-CA_CERTS_PREINSTALLED= false
-SKIP_CERT_SUPPRESSION= false
-VENDOR_NAME="Intune"
-HIDE_SERVICES= false
-DISABLE_QUIT= false
-START_AT_BOOT= true
-HIDE_ON_START= false
+$DEVICE_OWNERSHIP="S"
+$CA_CERTS_PREINSTALLED=$false
+$SKIP_CERT_SUPPRESSION=$false
+$VENDOR_NAME=""
+$HIDE_SERVICES=$false
+$DISABLE_QUIT=$false
+$START_AT_BOOT=$true
+$HIDE_ON_START=$true
 
-#User Information
+# User Information for Device Certificate
+$MULTI_USER=$true
 
-MULTI_USER= false
 
-# Run as administrator
+
 
 ################################################################################
 
@@ -62,16 +63,19 @@ $global_profile_dir = "C:\ProgramData"
 $MY_USER = ""
 $MY_EMAIL = ""
 function get_user_email() {
-    # assumes you can get user and email because device is joined to an Azure AD domain: https://nerdymishka.com/articles/azure-ad-domain-join-registry-keys/
-    # (you may use other techniques here as well)
-    $intune_info = "HKLM:\SYSTEM\CurrentControlSet\Control\CloudDomainJoin\JoinInfo"
-    if (Test-Path $intune_info) {
-        Write-Host "intune_info - extracting user email"
-        $ADJoinInfo = Get-ChildItem -path $intune_info
-        $ADJoinInfo = $ADJoinInfo -replace "HKEY_LOCAL_MACHINE","HKLM:"
-        $ADJoinUser = Get-ItemProperty -Path $ADJoinInfo
-        $script:MY_EMAIL = $ADJoinUser.UserEmail
-        $script:MY_USER = $MY_EMAIL.Split("@")[0]
+    if (!$MULTI_USER) {
+        # for a single user device, assumes you can get user and email because device is joined to an 
+        # Azure AD domain: https://nerdymishka.com/articles/azure-ad-domain-join-registry-keys/
+        # (you may use other techniques here as well)
+        $intune_info = "HKLM:\SYSTEM\CurrentControlSet\Control\CloudDomainJoin\JoinInfo"
+        if (Test-Path $intune_info) {
+            Write-Host "Extracting user email from: $intune_info"
+            $ADJoinInfo = Get-ChildItem -path $intune_info
+            $ADJoinInfo = $ADJoinInfo -replace "HKEY_LOCAL_MACHINE","HKLM:"
+            $ADJoinUser = Get-ItemProperty -Path $ADJoinInfo
+            $script:MY_EMAIL = $ADJoinUser.UserEmail
+            $script:MY_USER = $MY_EMAIL.Split("@")[0]
+        }
     }
     Write-Host "Installing for user with name: $MY_USER"
     Write-Host "Installing for user with email: $MY_EMAIL"
