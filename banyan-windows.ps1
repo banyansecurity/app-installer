@@ -5,13 +5,13 @@
 # Confirm or update the following variables prior to running the script
 
 # Deployment Information
-
 $INVITE_CODE=$args[0]
 $DEPLOYMENT_KEY=$args[1]
 $APP_VERSION=$args[2]
 
 # Device Registration and Banyan App Configuration
-
+# Check docs for more options and details:
+# https://docs.banyansecurity.io/docs/feature-guides/manage-users-and-devices/device-managers/distribute-desktopapp/#mdm-config-json
 $DEVICE_OWNERSHIP="S"
 $CA_CERTS_PREINSTALLED=$false
 $SKIP_CERT_SUPPRESSION=$false
@@ -60,6 +60,8 @@ Write-Host "Installing app for user: $logged_on_user"
 $global_profile_dir = "C:\ProgramData"
 
 
+
+
 $MY_USER = ""
 $MY_EMAIL = ""
 function get_user_email() {
@@ -85,7 +87,6 @@ function get_user_email() {
 }
 
 
-
 function create_config() {
     Write-Host "Creating mdm-config json file"
 
@@ -93,8 +94,6 @@ function create_config() {
     $global_config_dir = $global_profile_dir + "\" + $banyan_dir_name
     $global_config_file = $global_config_dir + "\" + "mdm-config.json"
 
-    # the config below WILL NOT install your org's Banyan Private Root CA
-    # it assumes you are using your Device Manager to push down the Private Root CA
     $json = [pscustomobject]@{
         mdm_invite_code = $INVITE_CODE
         mdm_deploy_user = $MY_USER
@@ -112,6 +111,13 @@ function create_config() {
     New-Item -Path $global_profile_dir -Name $banyan_dir_name -ItemType "directory" -Force | Out-Null
     Set-Content -Path $global_config_file -Value $json -NoNewLine
 }
+
+
+
+
+
+
+
 
 
 function download_install() {

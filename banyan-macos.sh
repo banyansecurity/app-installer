@@ -5,13 +5,13 @@
 # Confirm or update the following variables prior to running the script
 
 # Deployment Information
-
 INVITE_CODE="$1"
 DEPLOYMENT_KEY="$2"
 APP_VERSION="$3"
 
 # Device Registration and Banyan App Configuration
-
+# Check docs for more options and details:
+# https://docs.banyansecurity.io/docs/feature-guides/manage-users-and-devices/device-managers/distribute-desktopapp/#mdm-config-json
 DEVICE_OWNERSHIP="S"
 CA_CERTS_PREINSTALLED=false
 SKIP_CERT_SUPPRESSION=false
@@ -29,10 +29,12 @@ USERINFO_EMAIL_VAR=""
 
 ################################################################################
 
+
 if [[ $EUID -ne 0 ]]; then
     echo "This script must be run with admin privilege"
     exit 1
 fi
+
 
 if [[ -z "$INVITE_CODE" || -z "$DEPLOYMENT_KEY" ]]; then
     echo "Usage: "
@@ -50,12 +52,13 @@ echo "Installing with invite code: $INVITE_CODE"
 echo "Installing using deploy key: *****"
 echo "Installing app version: $APP_VERSION"
 
+
+
 logged_on_user=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
 echo "Installing app for user: $logged_on_user"
 
 global_config_dir="/etc/banyanapp"
 tmp_dir="/etc/banyanapp/tmp"
-
 mkdir -p "$tmp_dir"
 
 
@@ -84,39 +87,27 @@ function create_config() {
     echo "Creating mdm-config json file"
     global_config_file="${global_config_dir}/mdm-config.json"
 
-    # the config below WILL install your org's Banyan Private Root CA
-    # alternatively, you may use your Device Manager to push down the Private Root CA
     mdm_config_json='{
-        "mdm_invite_code": "REPLACE_WITH_INVITE_CODE",
-        "mdm_deploy_user": "REPLACE_WITH_USER",
-        "mdm_deploy_email": "REPLACE_WITH_EMAIL",
-        "mdm_device_ownership": "REPLACE_WITH_DEVICE_OWNERSHIP",
-        "mdm_ca_certs_preinstalled": "REPLACE_WITH_CA_CERTS_PREINSTALLED",
-        "mdm_skip_cert_suppression": "REPLACE_WITH_SKIP_CERT_SUPPRESSION",
-        "mdm_vendor_name": "REPLACE_WITH_VENDOR_NAME",
-        "mdm_hide_services": "REPLACE_WITH_HIDE_SERVICES",
-        "mdm_disable_quit": "REPLACE_WITH_DISABLE_QUIT",
-        "mdm_start_at_boot": "REPLACE_WITH_START_AT_BOOT",
-        "mdm_hide_on_start": "REPLACE_WITHSTART_AT_BOOT"
+        "mdm_invite_code": '"\"${INVITE_CODE}\""',
+        "mdm_deploy_user": '"\"${MY_USER}\""',
+        "mdm_deploy_email": '"\"${MY_EMAIL}\""',
+        "mdm_device_ownership": '"${DEVICE_OWNERSHIP}"',
+        "mdm_ca_certs_preinstalled": '"${CA_CERTS_PREINSTALLED}"',
+        "mdm_skip_cert_suppression": '"${SKIP_CERT_SUPPRESSION}"',
+        "mdm_vendor_name": '"\"${VENDOR_NAME}\""',
+        "mdm_hide_services": '"${HIDE_SERVICES}"',
+        "mdm_disable_quit": '"${DISABLE_QUIT}"',
+        "mdm_start_at_boot": '"${START_AT_BOOT}"',
+        "mdm_hide_on_start": '"${HIDE_ON_START}"'
     }'
 
     echo "$mdm_config_json" > "${global_config_file}"
-    sed -i '' "s/REPLACE_WITH_INVITE_CODE/${INVITE_CODE}/" "${global_config_file}"
-    sed -i '' "s/REPLACE_WITH_USER/${MY_USER}/" "${global_config_file}"
-    sed -i '' "s/REPLACE_WITH_EMAIL/${MY_EMAIL}/" "${global_config_file}"
-    sed -i '' "s/REPLACE_WITH_DEVICE_OWNERSHIP/${DEVICE_OWNERSHIP}/" "${global_config_file}"
-    sed -i '' "s/REPLACE_WITH_CA_CERTS_PREINSTALLED/${CA_CERTS_PREINSTALLED}/" "${global_config_file}"
-    sed -i '' "s/REPLACE_WITH_SKIP_CERT_SUPPRESSION/${SKIP_CERT_SUPPRESSION}/" "${global_config_file}"
-    sed -i '' "s/REPLACE_WITH_VENDOR_NAME/${VENDOR_NAME}/" "${global_config_file}"
-    sed -i '' "s/REPLACE_WITH_HIDE_SERVICES/${HIDE_SERVICES}/" "${global_config_file}"
-    sed -i '' "s/REPLACE_WWITH_DISABLE_QUIT/${DISABLE_QUIT}/" "${global_config_file}"
-    sed -i '' "s/REPLACE_WITH_START_AT_BOOT/${START_AT_BOOT}/" "${global_config_file}"
-    sed -i '' "s/REPLACE_WITH_START_AT_BOOT/${HIDE_ON_START}/" "${global_config_file}"
 }
 
 
 function download_install() {
     echo "Downloading installer PKG"
+
 
     full_version="${APP_VERSION}"
     dl_file="${tmp_dir}/Banyan-${full_version}.pkg"
