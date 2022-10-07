@@ -20,6 +20,7 @@ $HIDE_SERVICES = $false
 $DISABLE_QUIT = $false
 $START_AT_BOOT = $true
 $HIDE_ON_START = $true
+$DISABLE_AUTO_UPDATE = $false
 
 # User Information for Device Certificate
 $MULTI_USER = $true
@@ -106,6 +107,7 @@ function create_config() {
         mdm_disable_quit = $DISABLE_QUIT
         mdm_start_at_boot = $START_AT_BOOT
         mdm_hide_on_start = $HIDE_ON_START
+        mdm_disable_auto_update = $DISABLE_AUTO_UPDATE
     } | ConvertTo-Json
 
     New-Item -Path $global_profile_dir -Name $banyan_dir_name -ItemType "directory" -Force | Out-Null
