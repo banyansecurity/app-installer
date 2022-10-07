@@ -66,17 +66,17 @@ We have pre-configured the main script to be run via Device Managers (such as VM
 
 ### Jamf Pro
 
-Use the `banyan-macos-jamf.sh` script, following our [Jamf Pro - Zero Touch Installation doc](https://docs.banyansecurity.io/docs/feature-guides/manage-users-and-devices/device-managers/jamf-pro-zero-touch/).
+Use the [**banyan-macos-jamf.sh**](device_manager/banyan-macos-jamf.sh) script, following our [Jamf Pro - Zero Touch Installation doc](https://docs.banyansecurity.io/docs/feature-guides/manage-users-and-devices/device-managers/jamf-pro-zero-touch/).
 
 
 ### Kandji
 
-Use the `banyan-macos-kandji.sh` script, following our [Kandji- Zero Touch Installation doc](https://docs.banyansecurity.io/docs/feature-guides/manage-users-and-devices/device-managers/kandji-zero-touch/).
+Use the [**banyan-macos-kandji.sh**](device_manager/banyan-macos-kandji.sh) script, following our [Kandji- Zero Touch Installation doc](https://docs.banyansecurity.io/docs/feature-guides/manage-users-and-devices/device-managers/kandji-zero-touch/).
 
 
 ### Microsoft Intune
 
-Use the `banyan-windows-intune.ps1` script, following our [Intune - Zero Touch Installation doc](https://docs.banyansecurity.io/docs/feature-guides/manage-users-and-devices/device-managers/intune-zero-touch/).
+Use the [**banyan-windows-intune.ps1**](device_manager/banyan-windows-intune.ps1) script, following our [Intune - Zero Touch Installation doc](https://docs.banyansecurity.io/docs/feature-guides/manage-users-and-devices/device-managers/intune-zero-touch/).
 
 
 ### VMWare Workspace One UEM

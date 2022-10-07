@@ -60,11 +60,11 @@ def intune_windows(infile, outfile)
 end
 
 
-jamf("banyan-macos.sh", "banyan-macos-jamf.sh")
-kandji("banyan-macos.sh", "banyan-macos-kandji.sh")
-intune_windows("banyan-windows.ps1", "banyan-windows-intune.ps1")
+jamf("../banyan-macos.sh", "banyan-macos-jamf.sh")
+kandji("../banyan-macos.sh", "banyan-macos-kandji.sh")
+intune_windows("../banyan-windows.ps1", "banyan-windows-intune.ps1")
 
 # TODO
-#intune_macos("banyan-macos.sh", "banyan-macos-intune.sh")
-#ws1_windows("banyan-windows.ps1", "banyan-windows-ws1.ps1")
-#ws1_macos("banyan-windows.ps1", "banyan-macos-ws1.sh")
+#intune_macos("../banyan-macos.sh", "banyan-macos-intune.sh")
+#ws1_windows("../banyan-windows.ps1", "banyan-windows-ws1.ps1")
+#ws1_macos("../banyan-windows.ps1", "banyan-macos-ws1.sh")
