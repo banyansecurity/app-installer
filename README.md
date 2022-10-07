@@ -62,33 +62,28 @@ Launch PowerShell as Administrator and run:
 
 ## Notes for usage with Device Managers
 
-You can modify these script to be run via Device Managers (such as VMware Workspace ONE, Jamf Pro, Microsoft Intune, etc.).
+We have pre-configured the main script to be run via Device Managers (such as VMware Workspace ONE, Jamf Pro, Kandji, Microsoft Intune, etc.).
 
 ### Jamf Pro
 
-If you use [Jamf to run the Bash script](https://docs.jamf.com/10.26.0/jamf-pro/administrator-guide/Scripts.html), note that the first 3 input parameters are reserved for Jamf internal use. Instead, you have to set the Invite Code, Deployment Key and App Version as Parameter 4, Parameter 5 and Parameter 6 respectively. Update the script accordingly: 
+Use the `banyan-macos-jamf.sh` script, following our [Jamf Pro - Zero Touch Installation doc](https://docs.banyansecurity.io/docs/feature-guides/manage-users-and-devices/device-managers/jamf-pro-zero-touch/).
 
-```bash
-INVITE_CODE="$4"
-DEPLOYMENT_KEY="$5"
-APP_VERSION="$6" #optional
-```
+
+### Kandji
+
+Use the `banyan-macos-kandji.sh` script, following our [Kandji- Zero Touch Installation doc](https://docs.banyansecurity.io/docs/feature-guides/manage-users-and-devices/device-managers/kandji-zero-touch/).
+
 
 ### Microsoft Intune
 
-If you use [Intune to run the Powershell script](https://docs.microsoft.com/en-us/mem/intune/apps/intune-management-extension), note that Intune doesn't currently permit you to pass in input parameters. Instead, you have to hardcode the Invite Code, Deployment Key and App Version. Update the script accordingly:
+Use the `banyan-windows-intune.ps1` script, following our [Intune - Zero Touch Installation doc](https://docs.banyansecurity.io/docs/feature-guides/manage-users-and-devices/device-managers/intune-zero-touch/).
 
-```powershell
-$INVITE_CODE=<YOUR_INVITE_CODE>
-$DEPLOYMENT_KEY=<YOUR_DEPLOYMENT_KEY>
-$APP_VERSION=<YOUR_APP_VERSION (optional)>
-```
 
 ### VMWare Workspace One UEM
 
-If you use [Workspace One UEM to distribute the Banyan Desktop App](https://docs.banyanops.com/docs/feature-guides/manage-users-and-devices/device-managers/workspace-one-cert-api/#wsone), you need to set a few additional parameters in the `mdm-config.json` file so Banyan’s TrustScoring engine can correlate data from devices running the Banyan Desktop App with the data in Workspace ONE UEM:
+Use our base scripts and customize as needed, following our [Workspace ONE UEM - Device Identity & Enhanced TrustScoring doc](https://docs.banyanops.com/docs/feature-guides/manage-users-and-devices/device-managers/workspace-one-cert-api/#wsone). You need to set a few additional parameters in the `mdm-config.json` file so Banyan’s TrustScoring engine can correlate data from devices running the Banyan Desktop App with the data in Workspace ONE UEM:
 
-- `mdm_vendor_name` should be **Airwatch**
+- `mdm_vendor_name` should be set to **Airwatch**
 - `mdm_present` should be **true**
 - `mdm_vendor_udid` should be the **DEVICE UDID**
 
