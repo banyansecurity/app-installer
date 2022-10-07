@@ -108,6 +108,16 @@ function create_config() {
 function download_install() {
     echo "Downloading installer PKG"
 
+    # check to see if the Mac is Intel or ARM; if ARM use the native build
+    arm_suffix=""
+    IFS='.' read osvers_major osvers_minor osvers_dot_version <<< "$(/usr/bin/sw_vers -productVersion)"
+    if [[ ${osvers_major} -ge 11 ]]; then
+        processor=$(/usr/sbin/sysctl -n machdep.cpu.brand_string | grep -o "Intel")
+        if [[ -z "$processor" ]]; then
+            echo "Detected ARM processor"
+            arm_suffix="-arm64"
+        fi
+    fi
 
     full_version="${APP_VERSION}"
     dl_file="${tmp_dir}/Banyan-${full_version}.pkg"
