@@ -2,6 +2,8 @@
 
 Automate installation of Banyan App on end-user devices.
 
+See [Banyan documentation](https://docs.banyansecurity.io/docs/feature-guides/manage-users-and-devices/device-managers/distribute-desktopapp/) for more details.
+
 
 ## Install using Zero Touch Flow
 
