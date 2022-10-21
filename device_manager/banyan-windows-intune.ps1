@@ -23,7 +23,7 @@ $HIDE_ON_START = $true
 $DISABLE_AUTO_UPDATE = $false
 
 # User Information for Device Certificate
-$MULTI_USER = false
+$MULTI_USER = $false
 
 
 

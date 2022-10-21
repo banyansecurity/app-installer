@@ -54,7 +54,7 @@ def intune_windows(infile, outfile)
 	# https://nerdymishka.com/articles/azure-ad-domain-join-registry-keys/
 	txt.gsub!(/(\$DEVICE_OWNERSHIP = ).*$/, "\\1" + '"C"')
 	txt.gsub!(/(\$VENDOR_NAME = ).*$/, "\\1" + '"Intune"')
-	txt.gsub!(/(\$MULTI_USER = ).*$/, "\\1" + 'false')
+	txt.gsub!(/(\$MULTI_USER = ).*$/, "\\1" + '$false')
 
 	File.write(outfile, txt)
 end

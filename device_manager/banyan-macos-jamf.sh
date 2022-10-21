@@ -121,7 +121,7 @@ function download_install() {
         fi
     fi
 
-    full_version="${APP_VERSION}"
+    full_version="${APP_VERSION}${arm_suffix}"
     dl_file="${tmp_dir}/Banyan-${full_version}.pkg"
 
     if [[ -f "${dl_file}" ]]; then
