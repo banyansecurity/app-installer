@@ -5,17 +5,17 @@ def jamf(infile, outfile)
 
 	# first 3 input parameters are reserved for Jamf internal use
 	# https://docs.jamf.com/10.26.0/jamf-pro/administrator-guide/Scripts.html
-	txt.gsub!(/(INVITE_CODE=).*$/, "\\1" + '"$4"')
-	txt.gsub!(/(DEPLOYMENT_KEY=).*$/, "\\1" + '"$5"')
-	txt.gsub!(/(APP_VERSION=).*$/, "\\1" + '"$6"')
+	txt.sub!(/(INVITE_CODE=).*$/, "\\1" + '"$4"')
+	txt.sub!(/(DEPLOYMENT_KEY=).*$/, "\\1" + '"$5"')
+	txt.sub!(/(APP_VERSION=).*$/, "\\1" + '"$6"')
 
 	# single-user device with configuration profile set 
-	txt.gsub!(/(DEVICE_OWNERSHIP=).*$/, "\\1" + '"C"')
-	txt.gsub!(/(VENDOR_NAME=).*$/, "\\1" + '"Jamf"')
-	txt.gsub!(/(MULTI_USER=).*$/, "\\1" + 'false')
-	txt.gsub!(/(USERINFO_PATH=).*$/, "\\1" + '"/Library/Managed Preferences/userinfo.plist"')
-	txt.gsub!(/(USERINFO_USER_VAR=).*$/, "\\1" + '"deploy_user"')
-	txt.gsub!(/(USERINFO_EMAIL_VAR=).*$/, "\\1" + '"deploy_email"')
+	txt.sub!(/(DEVICE_OWNERSHIP=).*$/, "\\1" + '"C"')
+	txt.sub!(/(VENDOR_NAME=).*$/, "\\1" + '"Jamf"')
+	txt.sub!(/(MULTI_USER=).*$/, "\\1" + 'false')
+	txt.sub!(/(USERINFO_PATH=).*$/, "\\1" + '"/Library/Managed Preferences/userinfo.plist"')
+	txt.sub!(/(USERINFO_USER_VAR=).*$/, "\\1" + '"deploy_user"')
+	txt.sub!(/(USERINFO_EMAIL_VAR=).*$/, "\\1" + '"deploy_email"')
 
 	File.write(outfile, txt)
 end
@@ -25,18 +25,18 @@ def kandji(infile, outfile)
 
 	# Kandji's Custom Scripts capability doesn't currently permit you to pass in input parameters
 	# https://support.kandji.io/support/solutions/articles/72000558749-custom-scripts-overview
-	txt.gsub!(/(INVITE_CODE=).*$/, "\\1" + '"<YOUR_INVITE_CODE>"')
-	txt.gsub!(/(DEPLOYMENT_KEY=).*$/, "\\1" + '"<YOUR_DEPLOYMENT_KEY>"')
-	txt.gsub!(/(APP_VERSION=).*$/, "\\1" + '"<YOUR_APP_VERSION (optional)>"')	
+	txt.sub!(/(INVITE_CODE=).*$/, "\\1" + '"<YOUR_INVITE_CODE>"')
+	txt.sub!(/(DEPLOYMENT_KEY=).*$/, "\\1" + '"<YOUR_DEPLOYMENT_KEY>"')
+	txt.sub!(/(APP_VERSION=).*$/, "\\1" + '"<YOUR_APP_VERSION (optional)>"')	
 
 	# single-user device; user details in Global Variables
 	# https://support.kandji.io/support/solutions/articles/72000560519
-	txt.gsub!(/(DEVICE_OWNERSHIP=).*$/, "\\1" + '"C"')
-	txt.gsub!(/(VENDOR_NAME=).*$/, "\\1" + '"Kandji"')
-	txt.gsub!(/(MULTI_USER=).*$/, "\\1" + 'false')
-	txt.gsub!(/(USERINFO_PATH=).*$/, "\\1" + '"/Library/Managed Preferences/io.kandji.globalvariables.plist"')
-	txt.gsub!(/(USERINFO_USER_VAR=).*$/, "\\1" + '"FULL_NAME"')
-	txt.gsub!(/(USERINFO_EMAIL_VAR=).*$/, "\\1" + '"EMAIL"')
+	txt.sub!(/(DEVICE_OWNERSHIP=).*$/, "\\1" + '"C"')
+	txt.sub!(/(VENDOR_NAME=).*$/, "\\1" + '"Kandji"')
+	txt.sub!(/(MULTI_USER=).*$/, "\\1" + 'false')
+	txt.sub!(/(USERINFO_PATH=).*$/, "\\1" + '"/Library/Managed Preferences/io.kandji.globalvariables.plist"')
+	txt.sub!(/(USERINFO_USER_VAR=).*$/, "\\1" + '"FULL_NAME"')
+	txt.sub!(/(USERINFO_EMAIL_VAR=).*$/, "\\1" + '"EMAIL"')
 
 	File.write(outfile, txt)
 end
@@ -46,15 +46,15 @@ def intune_windows(infile, outfile)
 
 	# Intune's PowerShell script capability doesn't currently permit you to pass in input parameters
 	# https://docs.microsoft.com/en-us/mem/intune/apps/intune-management-extension
-	txt.gsub!(/(\$INVITE_CODE = ).*$/, "\\1" + '"<YOUR_INVITE_CODE>"')
-	txt.gsub!(/(\$DEPLOYMENT_KEY = ).*$/, "\\1" + '"<YOUR_DEPLOYMENT_KEY>"')
-	txt.gsub!(/(\$APP_VERSION = ).*$/, "\\1" + '"<YOUR_APP_VERSION (optional)>"')	
+	txt.sub!(/(\$INVITE_CODE = ).*$/, "\\1" + '"<YOUR_INVITE_CODE>"')
+	txt.sub!(/(\$DEPLOYMENT_KEY = ).*$/, "\\1" + '"<YOUR_DEPLOYMENT_KEY>"')
+	txt.sub!(/(\$APP_VERSION = ).*$/, "\\1" + '"<YOUR_APP_VERSION (optional)>"')	
 
 	# single-user device; user details available because joined to Azure AD domain
 	# https://nerdymishka.com/articles/azure-ad-domain-join-registry-keys/
-	txt.gsub!(/(\$DEVICE_OWNERSHIP = ).*$/, "\\1" + '"C"')
-	txt.gsub!(/(\$VENDOR_NAME = ).*$/, "\\1" + '"Intune"')
-	txt.gsub!(/(\$MULTI_USER = ).*$/, "\\1" + '$false')
+	txt.sub!(/(\$DEVICE_OWNERSHIP = ).*$/, "\\1" + '"C"')
+	txt.sub!(/(\$VENDOR_NAME = ).*$/, "\\1" + '"Intune"')
+	txt.sub!(/(\$MULTI_USER = ).*$/, "\\1" + '$false')
 
 	File.write(outfile, txt)
 end

@@ -48,7 +48,7 @@ if (!$APP_VERSION) {
     $res = Invoke-WebRequest "https://www.banyanops.com/app/windows/v3/latest" -MaximumRedirection 0 -ErrorAction SilentlyContinue -UseBasicParsing
     $loc = $res.Headers.Location
     $match = select-string "Banyan-Setup-(.*).exe" -inputobject $loc
-    $APP_VERSION = "<YOUR_APP_VERSION (optional)>"
+    $APP_VERSION = $match.matches.groups[1].value
 }
 
 Write-Host "Installing with invite code: $INVITE_CODE"
