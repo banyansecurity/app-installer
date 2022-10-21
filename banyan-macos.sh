@@ -66,7 +66,7 @@ mkdir -p "$tmp_dir"
 MY_USER=""
 MY_EMAIL=""
 function get_user_email() {
-    if [[ "$MULTI_USER" != true ]]
+    if [[ "$MULTI_USER" != true ]]; then
         # for a single user device, assumes user and email are set in a custom plist file deployed via Device Manager
         # (you may instead use a different technique, like: https://github.com/pbowden-msft/SignInHelper)
         if [[ -e "$USERINFO_PATH" ]]; then
