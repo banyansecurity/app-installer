@@ -92,7 +92,7 @@ function create_config() {
         "mdm_invite_code": '"\"${INVITE_CODE}\""',
         "mdm_deploy_user": '"\"${MY_USER}\""',
         "mdm_deploy_email": '"\"${MY_EMAIL}\""',
-        "mdm_device_ownership": '"${DEVICE_OWNERSHIP}"',
+        "mdm_device_ownership": '"\"${DEVICE_OWNERSHIP}\""',
         "mdm_ca_certs_preinstalled": '"${CA_CERTS_PREINSTALLED}"',
         "mdm_skip_cert_suppression": '"${SKIP_CERT_SUPPRESSION}"',
         "mdm_vendor_name": '"\"${VENDOR_NAME}\""',
