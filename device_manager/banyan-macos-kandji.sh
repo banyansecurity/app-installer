@@ -5,8 +5,9 @@
 # Confirm or update the following variables prior to running the script
 
 # Deployment Information
-INVITE_CODE="<YOUR_INVITE_CODE>" # Obtained from Settings > App Deployment > Invite Code
-DEPLOYMENT_KEY="<YOUR_DEPLOYMENT_KEY>" # Obtained from Settings > App Deployment > Zero-Touch Deployment Using a Device Manager
+# Obtain from the Banyan admin console: Settings > App Deployment
+INVITE_CODE="<YOUR_INVITE_CODE>"
+DEPLOYMENT_KEY="<YOUR_DEPLOYMENT_KEY>"
 APP_VERSION="<YOUR_APP_VERSION (optional)>"
 
 # Device Registration and Banyan App Configuration
