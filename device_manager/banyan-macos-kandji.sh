@@ -5,17 +5,17 @@
 # Confirm or update the following variables prior to running the script
 
 # Deployment Information
-INVITE_CODE="$1"
-DEPLOYMENT_KEY="$2"
-APP_VERSION="$3"
+INVITE_CODE="<YOUR_INVITE_CODE>"
+DEPLOYMENT_KEY="<YOUR_DEPLOYMENT_KEY>"
+APP_VERSION="<YOUR_APP_VERSION (optional)>"
 
 # Device Registration and Banyan App Configuration
 # Check docs for more options and details:
 # https://docs.banyansecurity.io/docs/feature-guides/manage-users-and-devices/device-managers/distribute-desktopapp/#mdm-config-json
-DEVICE_OWNERSHIP="S"
+DEVICE_OWNERSHIP="C"
 CA_CERTS_PREINSTALLED=false
 SKIP_CERT_SUPPRESSION=false
-VENDOR_NAME=""
+VENDOR_NAME="Kandji"
 HIDE_SERVICES=false
 DISABLE_QUIT=false
 START_AT_BOOT=true
@@ -23,10 +23,10 @@ HIDE_ON_START=true
 DISABLE_AUTO_UPDATE=false
 
 # User Information for Device Certificate
-MULTI_USER=true
-USERINFO_PATH=""
-USERINFO_USER_VAR=""
-USERINFO_EMAIL_VAR=""
+MULTI_USER=false
+USERINFO_PATH="/Library/Managed Preferences/io.kandji.globalvariables.plist"
+USERINFO_USER_VAR="FULL_NAME"
+USERINFO_EMAIL_VAR="EMAIL"
 
 ################################################################################
 

@@ -5,17 +5,17 @@
 # Confirm or update the following variables prior to running the script
 
 # Deployment Information
-$INVITE_CODE = $args[0]
-$DEPLOYMENT_KEY = $args[1]
-$APP_VERSION = $args[2]
+$INVITE_CODE = "<YOUR_INVITE_CODE>"
+$DEPLOYMENT_KEY = "<YOUR_DEPLOYMENT_KEY>"
+$APP_VERSION = "<YOUR_APP_VERSION (optional)>"
 
 # Device Registration and Banyan App Configuration
 # Check docs for more options and details:
 # https://docs.banyansecurity.io/docs/feature-guides/manage-users-and-devices/device-managers/distribute-desktopapp/#mdm-config-json
-$DEVICE_OWNERSHIP = "S"
+$DEVICE_OWNERSHIP = "C"
 $CA_CERTS_PREINSTALLED = $false
 $SKIP_CERT_SUPPRESSION = $false
-$VENDOR_NAME = ""
+$VENDOR_NAME = "Intune"
 $HIDE_SERVICES = $false
 $DISABLE_QUIT = $false
 $START_AT_BOOT = $true
@@ -23,7 +23,7 @@ $HIDE_ON_START = $true
 $DISABLE_AUTO_UPDATE = $false
 
 # User Information for Device Certificate
-$MULTI_USER = $true
+$MULTI_USER = $false
 
 
 
