@@ -5,8 +5,8 @@
 # Confirm or update the following variables prior to running the script
 
 # Deployment Information
-INVITE_CODE="$1" # Obtained from **Settings** > **App Deployment** > **Invite Code**
-DEPLOYMENT_KEY="$2" # Obtained from **Settings** > **Desktop & Mobile** > **App Deployment**
+INVITE_CODE="$1" # Obtained from Settings > App Deployment > Invite Code
+DEPLOYMENT_KEY="$2" # Obtained from Settings > App Deployment > Zero-Touch Deployment Using a Device Manager
 APP_VERSION="$3"
 
 # Device Registration and Banyan App Configuration
