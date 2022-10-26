@@ -5,8 +5,8 @@
 # Confirm or update the following variables prior to running the script
 
 # Deployment Information
-INVITE_CODE="<YOUR_INVITE_CODE>"
-DEPLOYMENT_KEY="<YOUR_DEPLOYMENT_KEY>"
+INVITE_CODE="<YOUR_INVITE_CODE>" # Obtained from **Settings** > **App Deployment** > **Invite Code**
+DEPLOYMENT_KEY="<YOUR_DEPLOYMENT_KEY>" # Obtained from **Settings** > **Desktop & Mobile** > **App Deployment**
 APP_VERSION="<YOUR_APP_VERSION (optional)>"
 
 # Device Registration and Banyan App Configuration
@@ -100,7 +100,7 @@ function create_config() {
         "mdm_disable_quit": '"${DISABLE_QUIT}"',
         "mdm_start_at_boot": '"${START_AT_BOOT}"',
         "mdm_hide_on_start": '"${HIDE_ON_START}"',
-        "mdm_disable_auto_update": '"${DISABLE_AUTO_UPDATE}"'        
+        "mdm_disable_auto_update": '"${DISABLE_AUTO_UPDATE}"'
     }'
 
     echo "$mdm_config_json" > "${global_config_file}"

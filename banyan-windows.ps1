@@ -5,8 +5,8 @@
 # Confirm or update the following variables prior to running the script
 
 # Deployment Information
-$INVITE_CODE = $args[0]
-$DEPLOYMENT_KEY = $args[1]
+$INVITE_CODE = $args[0] #Obtained from **Settings** > **App Deployment** > **Invite Code**
+$DEPLOYMENT_KEY = $args[1] #Obtained from **Settings** > **Desktop & Mobile** > **App Deployment**
 $APP_VERSION = $args[2]
 
 # Device Registration and Banyan App Configuration
@@ -67,7 +67,7 @@ $MY_USER = ""
 $MY_EMAIL = ""
 function get_user_email() {
     if (!$MULTI_USER) {
-        # for a single user device, assumes you can get user and email because device is joined to an 
+        # for a single user device, assumes you can get user and email because device is joined to an
         # Azure AD domain: https://nerdymishka.com/articles/azure-ad-domain-join-registry-keys/
         # (you may use other techniques here as well)
         $intune_info = "HKLM:\SYSTEM\CurrentControlSet\Control\CloudDomainJoin\JoinInfo"
