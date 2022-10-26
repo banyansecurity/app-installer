@@ -5,6 +5,7 @@
 # Confirm or update the following variables prior to running the script
 
 # Deployment Information
+# Obtain from the Banyan admin console: Settings > App Deployment
 INVITE_CODE="$1"
 DEPLOYMENT_KEY="$2"
 APP_VERSION="$3"
@@ -100,7 +101,7 @@ function create_config() {
         "mdm_disable_quit": '"${DISABLE_QUIT}"',
         "mdm_start_at_boot": '"${START_AT_BOOT}"',
         "mdm_hide_on_start": '"${HIDE_ON_START}"',
-        "mdm_disable_auto_update": '"${DISABLE_AUTO_UPDATE}"'        
+        "mdm_disable_auto_update": '"${DISABLE_AUTO_UPDATE}"'
     }'
 
     echo "$mdm_config_json" > "${global_config_file}"

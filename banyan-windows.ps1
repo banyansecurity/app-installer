@@ -5,6 +5,7 @@
 # Confirm or update the following variables prior to running the script
 
 # Deployment Information
+# Obtain from the Banyan admin console: Settings > App Deployment
 $INVITE_CODE = $args[0]
 $DEPLOYMENT_KEY = $args[1]
 $APP_VERSION = $args[2]
@@ -67,7 +68,7 @@ $MY_USER = ""
 $MY_EMAIL = ""
 function get_user_email() {
     if (!$MULTI_USER) {
-        # for a single user device, assumes you can get user and email because device is joined to an 
+        # for a single user device, assumes you can get user and email because device is joined to an
         # Azure AD domain: https://nerdymishka.com/articles/azure-ad-domain-join-registry-keys/
         # (you may use other techniques here as well)
         $intune_info = "HKLM:\SYSTEM\CurrentControlSet\Control\CloudDomainJoin\JoinInfo"
