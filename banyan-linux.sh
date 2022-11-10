@@ -12,7 +12,7 @@ APP_VERSION="$2"
 # Device Registration and Banyan App Configuration
 # Check docs for more options and details:
 # https://docs.banyansecurity.io/docs/feature-guides/manage-users-and-devices/device-managers/distribute-desktopapp/#mdm-config-json
-DEVICE_OWNERSHIP="S"
+DEVICE_OWNERSHIP="C"
 CA_CERTS_PREINSTALLED=false
 SKIP_CERT_SUPPRESSION=false
 VENDOR_NAME=""
@@ -63,27 +63,6 @@ tmp_dir="/etc/banyanapp/tmp"
 mkdir -p "$tmp_dir"
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function create_config() {
     echo "Creating mdm-config json file"
     global_config_file="${global_config_dir}/mdm-config.json"
@@ -107,15 +86,55 @@ function create_config() {
 }
 
 
+function check_error {
+    local err=$?
+    if [[ ${err} -ne 0 ]]; then
+        echo "$1 Error: ${err}"
+        exit 1
+    fi
+}
+
+
+# Prepare to install dependencies
+function install_deps_prepare {
+  # try to locate yum, fall back to apt-get
+  if [[ $(command -v yum) ]]; then
+    sudo yum clean metadata
+    check_error "sudo yum clean metadata"
+  else
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -q=2 update
+    check_error "sudo apt-get update"
+  fi
+}
+
+
+# Install dependencies, exit on any error
+function install_deps {
+  local deps=("${@}")
+
+  # try to locate yum, fall back to apt-get
+  if [[ $(command -v yum) ]]; then
+    sudo yum -y -q install "${deps[@]}"
+    check_error "sudo yum install ${deps[*]}"
+  else
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -q=2 -y install "${deps[@]}"
+    check_error "sudo apt-get install ${deps[*]}"
+    setup_cgroup
+  fi
+}
+
+
 function download_install() {
     echo "Downloading installer DEB/RPM"
 
-    if [[ $(command -v dpkg) ]]; then
-        echo "Found dpkg; assume DEB"
-        dl_path="banyanapp_${APP_VERSION}_amd64.deb"
-    else
-        echo "No dpkg; assume RPM"
+    echo "Installing dependencies"
+    install_deps_prepare
+    install_deps curl
+
+    if [[ $(command -v yum) ]]; then
         dl_path="banyanapp-${APP_VERSION}.x86_64.rpm"
+    else
+        dl_path="banyanapp_${APP_VERSION}_amd64.deb"
     fi
     dl_file="${tmp_dir}/${dl_path}"
 
@@ -127,10 +146,11 @@ function download_install() {
     fi
 
     echo "Run installer"
-    if [[ $(command -v dpkg) ]]; then
-        sudo dpkg -i "${dl_file}"
-    else
+    if [[ $(command -v yum) ]]; then
         sudo rpm -i "${dl_file}"
+    else
+        install_deps gconf2 gconf-service libappindicator1 libnss3-tools wireguard-tools
+        sudo dpkg -i "${dl_file}"
     fi
     sleep 3
 }
@@ -138,14 +158,14 @@ function download_install() {
 
 function start_app() {
     echo "Starting the Banyan app as: $logged_on_user"
-    sudo -H -u "${logged_on_user}" open /Applications/Banyan.app
+    sudo -H -u "${logged_on_user}" /opt/Banyan/banyanapp
     sleep 5
 }
 
 
 function stop_app() {
     echo "Stopping Banyan app"
-    killall Banyan
+    killall banyanapp
     sleep 2
 }
 
