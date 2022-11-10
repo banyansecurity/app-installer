@@ -23,11 +23,11 @@ START_AT_BOOT=true
 HIDE_ON_START=true
 DISABLE_AUTO_UPDATE=false
 
-# User Information for Device Certificate
-MULTI_USER=true
-USERINFO_PATH=""
-USERINFO_USER_VAR=""
-USERINFO_EMAIL_VAR=""
+# Device Certificate management isn't supported on Linux
+
+
+
+
 
 ################################################################################
 
@@ -46,8 +46,8 @@ fi
 
 if [[ -z "$APP_VERSION" ]]; then
     echo "Checking for latest version of app"
-    loc=$( curl -sI https://www.banyanops.com/app/macos/v3/latest | awk '/Location:/ {print $2}' )
-    APP_VERSION=$( awk -F'Banyan-|.pkg' '{print $2}' <<< "$loc" )
+    loc=$( curl -sI https://www.banyanops.com/app/linux/v3/latest-deb | awk '/Location:/ {print $2}' )
+    APP_VERSION=$( awk -F'banyanapp_|_amd64.deb' '{print $2}' <<< "$loc" )
 fi
 
 
@@ -56,7 +56,7 @@ echo "Installing with invite code: $INVITE_CODE"
 echo "Installing using deploy key: *****"
 echo "Installing app version: $APP_VERSION"
 
-logged_on_user=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
+logged_on_user=$( users | awk '{ print $1 }' )
 echo "Installing app for user: $logged_on_user"
 
 global_config_dir="/etc/banyanapp"
@@ -64,25 +64,25 @@ tmp_dir="/etc/banyanapp/tmp"
 mkdir -p "$tmp_dir"
 
 
-MY_USER=""
-MY_EMAIL=""
-function get_user_email() {
-    if [[ "$MULTI_USER" != true ]]; then
-        # for a single user device, assumes user and email are set in a custom plist file deployed via Device Manager
-        # (you may instead use a different technique, like: https://github.com/pbowden-msft/SignInHelper)
-        if [[ -e "$USERINFO_PATH" ]]; then
-            echo "Extracting user email from: $USERINFO_PATH"
-            MY_USER=$( defaults read "${USERINFO_PATH}" "${USERINFO_USER_VAR}" )
-            MY_EMAIL=$( defaults read "${USERINFO_PATH}" "${USERINFO_EMAIL_VAR}" )
-        fi
-    fi
 
-    echo "Installing for user with name: $MY_USER"
-    echo "Installing for user with email: $MY_EMAIL"
-    if [[ -z "$MY_EMAIL" ]]; then
-        echo "No user specified - device certificate will be issued to the default **STAGED USER**"
-    fi
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 function create_config() {
@@ -109,39 +109,31 @@ function create_config() {
 
 
 function download_install() {
-    echo "Downloading installer PKG"
+    echo "Downloading installer DEB/RPM"
 
-    # check to see if the Mac is Intel or ARM; if ARM use the native build
-    arm_suffix=""
-    IFS='.' read osvers_major osvers_minor osvers_dot_version <<< "$(/usr/bin/sw_vers -productVersion)"
-    if [[ ${osvers_major} -ge 11 ]]; then
-        processor=$(/usr/sbin/sysctl -n machdep.cpu.brand_string | grep -o "Intel")
-        if [[ -z "$processor" ]]; then
-            echo "Detected ARM processor"
-            arm_suffix="-arm64"
-        fi
+    if [[ $(command -v dpkg) ]]; then
+        echo "Found dpkg; assume DEB"
+        dl_path="banyanapp_${APP_VERSION}_amd64.deb"
+    else
+        echo "No dpkg; assume RPM"
+        dl_path="banyanapp-${APP_VERSION}.x86_64.rpm"
     fi
+    dl_file="${tmp_dir}/${dl_path}"
 
-    full_version="${APP_VERSION}${arm_suffix}"
-    dl_file="${tmp_dir}/Banyan-${full_version}.pkg"
 
     if [[ -f "${dl_file}" ]]; then
-        echo "Installer PKG already downloaded"
+        echo "Installer DEB/RPM already downloaded"
     else
-        curl -sL "https://www.banyanops.com/app/releases/Banyan-${full_version}.pkg" -o "${dl_file}"
+        curl -sL "https://www.banyanops.com/app/releases/${dl_path}" -o "${dl_file}"
     fi
 
     echo "Run installer"
-    sudo installer -pkg "${dl_file}" -target /
+    if [[ $(command -v dpkg) ]]; then
+        sudo dpkg -i "${dl_file}"
+    else
+        sudo rpm -i "${dl_file}"
+    fi
     sleep 3
-}
-
-
-function stage() {
-    echo "Running staged deployment"
-    /Applications/Banyan.app/Contents/Resources/bin/banyanapp-admin stage --key=$DEPLOYMENT_KEY
-    sleep 3
-    echo "Staged deployment done. Have the user start the Banyan app to complete registration."
 }
 
 
@@ -167,10 +159,8 @@ if [[ "$INVITE_CODE" = "upgrade" && "$DEPLOYMENT_KEY" = "upgrade" ]]; then
 else
     echo "Running zero-touch install flow"
     stop_app
-    get_user_email
     create_config
     download_install
-    stage
     create_config
     start_app
 fi
