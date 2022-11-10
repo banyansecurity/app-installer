@@ -7,8 +7,7 @@
 # Deployment Information
 # Obtain from the Banyan admin console: Settings > App Deployment
 INVITE_CODE="$1"
-DEPLOYMENT_KEY="$2"
-APP_VERSION="$3"
+APP_VERSION="$2"
 
 # Device Registration and Banyan App Configuration
 # Check docs for more options and details:
@@ -38,9 +37,9 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 
-if [[ -z "$INVITE_CODE" || -z "$DEPLOYMENT_KEY" ]]; then
+if [[ -z "$INVITE_CODE" ]]; then
     echo "Usage: "
-    echo "$0 <INVITE_CODE> <DEPLOYMENT_KEY> <APP_VERSION (optional>"
+    echo "$0 <INVITE_CODE> <APP_VERSION (optional>"
     exit 1
 fi
 
@@ -151,7 +150,7 @@ function stop_app() {
 }
 
 
-if [[ "$INVITE_CODE" = "upgrade" && "$DEPLOYMENT_KEY" = "upgrade" ]]; then
+if [[ "$INVITE_CODE" = "upgrade" ]]; then
     echo "Running upgrade flow"
     stop_app
     download_install

@@ -14,7 +14,7 @@ In the Banyan Command Center, navigate to **Settings** > **App Deployment**. Not
 The script will:
 1. Create an `mdm-config.json` file that specifies app functionality
 2. Download the *latest Banyan app* version and install it (you can also optionally specify an exact app version)
-3. Stage the app with the device certificate
+3. Stage the app with the device certificate (on Windows and MacOS)
 4. Start the app as the logged-on user
 
 
@@ -32,6 +32,14 @@ Launch PowerShell as Administrator and run:
 
 ```powershell
 .\banyan-windows.ps1 <INVITE_CODE> <DEPLOYMENT_KEY> <APP_VERSION (optional)>
+```
+
+### Linux
+
+Launch a terminal and run:
+
+```bash
+sudo ./banyan-linux.sh <INVITE_CODE> <APP_VERSION (optional)>
 ```
 
 
@@ -61,6 +69,15 @@ Launch PowerShell as Administrator and run:
 .\banyan-windows.ps1 upgrade upgrade <APP_VERSION (optional)>
 ```
 
+### Linux
+
+Launch a terminal and run:
+
+```bash
+sudo ./banyan-linux.sh upgrade <APP_VERSION (optional)>
+```
+
+---
 
 ## Notes for usage with Device Managers
 
