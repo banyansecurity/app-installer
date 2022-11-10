@@ -97,10 +97,9 @@ function check_error {
 
 # Prepare to install dependencies
 function install_deps_prepare {
-  # try to locate yum, fall back to apt-get
   if [[ $(command -v yum) ]]; then
-    sudo yum clean metadata
-    check_error "sudo yum clean metadata"
+    sudo yum check-update
+    check_error "sudo yum check-update"
   else
     sudo DEBIAN_FRONTEND=noninteractive apt-get -q=2 update
     check_error "sudo apt-get update"
@@ -119,7 +118,6 @@ function install_deps {
   else
     sudo DEBIAN_FRONTEND=noninteractive apt-get -q=2 -y install "${deps[@]}"
     check_error "sudo apt-get install ${deps[*]}"
-    setup_cgroup
   fi
 }
 
@@ -147,10 +145,11 @@ function download_install() {
 
     echo "Run installer"
     if [[ $(command -v yum) ]]; then
-        sudo rpm -i "${dl_file}"
+        sudo yum localinstall -y "${dl_file}"
+        check_error "sudo yum localinstall ${dl_file}"        
     else
-        install_deps gconf2 gconf-service libappindicator1 libnss3-tools wireguard-tools
-        sudo dpkg -i "${dl_file}"
+        sudo apt-get install "${dl_file}"
+        check_error "sudo apt-get install ${dl_file}"
     fi
     sleep 3
 }
@@ -158,7 +157,7 @@ function download_install() {
 
 function start_app() {
     echo "Starting the Banyan app as: $logged_on_user"
-    sudo -H -u "${logged_on_user}" /opt/Banyan/banyanapp
+    sudo -u "${logged_on_user}" /opt/Banyan/banyanapp
     sleep 5
 }
 
