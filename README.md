@@ -4,6 +4,7 @@ Automate installation of Banyan App on end-user devices.
 
 See [Banyan documentation](https://docs.banyansecurity.io/docs/feature-guides/manage-users-and-devices/device-managers/distribute-desktopapp/) for more details.
 
+---
 
 ## Install using Zero Touch Flow
 
@@ -14,7 +15,7 @@ In the Banyan Command Center, navigate to **Settings** > **App Deployment**. Not
 The script will:
 1. Create an `mdm-config.json` file that specifies app functionality
 2. Download the *latest Banyan app* version and install it (you can also optionally specify an exact app version)
-3. Stage the app with the device certificate (on Windows and MacOS)
+3. Stage the app with the device certificate
 4. Start the app as the logged-on user
 
 
@@ -41,7 +42,9 @@ Launch a terminal and run:
 ```bash
 sudo ./banyan-linux.sh <INVITE_CODE> <APP_VERSION (optional)>
 ```
+Note that the Linux script doesn't stage the app with the device certificate or start it up.
 
+---
 
 ## Upgrade Flow
 
@@ -76,6 +79,7 @@ Launch a terminal and run:
 ```bash
 sudo ./banyan-linux.sh upgrade <APP_VERSION (optional)>
 ```
+Note that the Linux script doesn't start up the app.
 
 ---
 
