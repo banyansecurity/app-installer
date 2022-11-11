@@ -33,7 +33,7 @@ USERINFO_EMAIL_VAR=""
 
 
 if [[ $EUID -ne 0 ]]; then
-    echo "This script must be run with admin privilege"
+    echo "This script must be run as the root user"
     exit 1
 fi
 

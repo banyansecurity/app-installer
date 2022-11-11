@@ -4,6 +4,7 @@ Automate installation of Banyan App on end-user devices.
 
 See [Banyan documentation](https://docs.banyansecurity.io/docs/feature-guides/manage-users-and-devices/device-managers/distribute-desktopapp/) for more details.
 
+---
 
 ## Install using Zero Touch Flow
 
@@ -34,6 +35,16 @@ Launch PowerShell as Administrator and run:
 .\banyan-windows.ps1 <INVITE_CODE> <DEPLOYMENT_KEY> <APP_VERSION (optional)>
 ```
 
+### Linux
+
+Launch a terminal and run:
+
+```bash
+sudo ./banyan-linux.sh <INVITE_CODE> <APP_VERSION (optional)>
+```
+Note that the Linux script doesn't stage the app with the device certificate or start it up.
+
+---
 
 ## Upgrade Flow
 
@@ -61,6 +72,16 @@ Launch PowerShell as Administrator and run:
 .\banyan-windows.ps1 upgrade upgrade <APP_VERSION (optional)>
 ```
 
+### Linux
+
+Launch a terminal and run:
+
+```bash
+sudo ./banyan-linux.sh upgrade <APP_VERSION (optional)>
+```
+Note that the Linux script doesn't start up the app.
+
+---
 
 ## Notes for usage with Device Managers
 
