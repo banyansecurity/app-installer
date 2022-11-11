@@ -9,8 +9,20 @@
 INVITE_CODE="$1"
 APP_VERSION="$2"
 
-# Device Registration, Banyan App Configuration, and
-# Device Certificate management should be handled by user
+# Device Registration and Banyan App Configuration
+# Check docs for more options and details:
+# https://docs.banyansecurity.io/docs/feature-guides/manage-users-and-devices/device-managers/distribute-desktopapp/#mdm-config-json
+DEVICE_OWNERSHIP="C"
+CA_CERTS_PREINSTALLED=false
+SKIP_CERT_SUPPRESSION=false
+VENDOR_NAME=""
+HIDE_SERVICES=false
+DISABLE_QUIT=false
+START_AT_BOOT=true
+HIDE_ON_START=true
+DISABLE_AUTO_UPDATE=false
+
+# Device Certificate will be installed when user registers device
 
 ################################################################################
 
@@ -52,6 +64,28 @@ global_config_dir="/etc/banyanapp"
 tmp_dir="/etc/banyanapp/tmp"
 mkdir -p "$tmp_dir"
 
+
+function create_config() {
+    echo "Creating mdm-config json file"
+    global_config_file="${global_config_dir}/mdm-config.json"
+
+    mdm_config_json='{
+        "mdm_invite_code": '"\"${INVITE_CODE}\""',
+        "mdm_device_ownership": '"\"${DEVICE_OWNERSHIP}\""',
+        "mdm_ca_certs_preinstalled": '"${CA_CERTS_PREINSTALLED}"',
+        "mdm_skip_cert_suppression": '"${SKIP_CERT_SUPPRESSION}"',
+        "mdm_vendor_name": '"\"${VENDOR_NAME}\""',
+        "mdm_hide_services": '"${HIDE_SERVICES}"',
+        "mdm_disable_quit": '"${DISABLE_QUIT}"',
+        "mdm_start_at_boot": '"${START_AT_BOOT}"',
+        "mdm_hide_on_start": '"${HIDE_ON_START}"',
+        "mdm_disable_auto_update": '"${DISABLE_AUTO_UPDATE}"'
+    }'
+
+    echo "$mdm_config_json" > "${global_config_file}"
+}
+
+
 function download_install() {
     echo "Downloading installer DEB/RPM"
 
@@ -78,5 +112,22 @@ function download_install() {
     sleep 5
 }
 
-echo "Running app install flow"
-download_install
+
+function stop_app() {
+    echo "Stopping Banyan app"
+    killall banyanapp
+    sleep 2
+}
+
+
+if [[ "$INVITE_CODE" = "upgrade" ]]; then
+    echo "Running upgrade flow"
+    stop_app
+    download_install
+else
+    echo "Running zero-touch install flow"
+    stop_app
+    create_config
+    download_install
+    create_config
+fi
