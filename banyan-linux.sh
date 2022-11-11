@@ -42,8 +42,10 @@ fi
 
 echo "Ensure curl is present"
 if [[ $(command -v yum) ]]; then
+    sudo yum -q check-update
     sudo yum install -y curl
 else
+    sudo apt-get -qq update
     sudo apt-get install -y curl
 fi
 
