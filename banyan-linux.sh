@@ -19,7 +19,7 @@ VENDOR_NAME=""
 HIDE_SERVICES=false
 DISABLE_QUIT=false
 START_AT_BOOT=true
-HIDE_ON_START=true
+HIDE_ON_START=false
 DISABLE_AUTO_UPDATE=false
 
 # Device Certificate will be installed when user registers device
