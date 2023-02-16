@@ -22,6 +22,7 @@ DISABLE_QUIT=false
 START_AT_BOOT=true
 HIDE_ON_START=true
 DISABLE_AUTO_UPDATE=false
+MDM_PRESENT=true
 
 # User Information for Device Certificate
 MULTI_USER=false
@@ -101,6 +102,7 @@ function create_config() {
         "mdm_disable_quit": '"${DISABLE_QUIT}"',
         "mdm_start_at_boot": '"${START_AT_BOOT}"',
         "mdm_hide_on_start": '"${HIDE_ON_START}"',
+        "mdm_present": '"${MDM_PRESENT}"',
         "mdm_disable_auto_update": '"${DISABLE_AUTO_UPDATE}"'
     }'
 
