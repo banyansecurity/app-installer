@@ -11,7 +11,8 @@ def jamf(infile, outfile)
 
 	# single-user device with configuration profile set 
 	txt.sub!(/(DEVICE_OWNERSHIP=).*$/, "\\1" + '"C"')
-	txt.sub!(/(VENDOR_NAME=).*$/, "\\1" + '"Jamf"')
+	txt.sub!(/(IS_MANAGED_DEVICE=).*$/, "\\1" + 'true')
+	txt.sub!(/(DEVICE_MANAGER_NAME=).*$/, "\\1" + '"Jamf"')
 	txt.sub!(/(MULTI_USER=).*$/, "\\1" + 'false')
 	txt.sub!(/(USERINFO_PATH=).*$/, "\\1" + '"/Library/Managed Preferences/userinfo.plist"')
 	txt.sub!(/(USERINFO_USER_VAR=).*$/, "\\1" + '"deploy_user"')
@@ -32,7 +33,8 @@ def kandji(infile, outfile)
 	# single-user device; user details in Global Variables
 	# https://support.kandji.io/support/solutions/articles/72000560519
 	txt.sub!(/(DEVICE_OWNERSHIP=).*$/, "\\1" + '"C"')
-	txt.sub!(/(VENDOR_NAME=).*$/, "\\1" + '"Kandji"')
+	txt.sub!(/(IS_MANAGED_DEVICE=).*$/, "\\1" + 'true')
+	txt.sub!(/(DEVICE_MANAGER_NAME=).*$/, "\\1" + '"Kandji"')
 	txt.sub!(/(MULTI_USER=).*$/, "\\1" + 'false')
 	txt.sub!(/(USERINFO_PATH=).*$/, "\\1" + '"/Library/Managed Preferences/io.kandji.globalvariables.plist"')
 	txt.sub!(/(USERINFO_USER_VAR=).*$/, "\\1" + '"FULL_NAME"')
@@ -53,7 +55,8 @@ def intune_windows(infile, outfile)
 	# single-user device; user details available because joined to Azure AD domain
 	# https://nerdymishka.com/articles/azure-ad-domain-join-registry-keys/
 	txt.sub!(/(\$DEVICE_OWNERSHIP = ).*$/, "\\1" + '"C"')
-	txt.sub!(/(\$VENDOR_NAME = ).*$/, "\\1" + '"Intune"')
+	txt.sub!(/(\$IS_MANAGED_DEVICE = ).*$/, "\\1" + '$true')
+	txt.sub!(/(\$DEVICE_MANAGER_NAME = ).*$/, "\\1" + '"Intune"')
 	txt.sub!(/(\$MULTI_USER = ).*$/, "\\1" + '$false')
 
 	File.write(outfile, txt)

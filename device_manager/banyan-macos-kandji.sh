@@ -16,7 +16,8 @@ APP_VERSION="<YOUR_APP_VERSION (optional)>"
 DEVICE_OWNERSHIP="C"
 CA_CERTS_PREINSTALLED=false
 SKIP_CERT_SUPPRESSION=false
-VENDOR_NAME="Kandji"
+IS_MANAGED_DEVICE=true
+DEVICE_MANAGER_NAME="Kandji"
 HIDE_SERVICES=false
 DISABLE_QUIT=false
 START_AT_BOOT=true
@@ -33,7 +34,7 @@ USERINFO_EMAIL_VAR="EMAIL"
 
 
 if [[ $EUID -ne 0 ]]; then
-    echo "This script must be run with admin privilege"
+    echo "This script must be run as the root user"
     exit 1
 fi
 
@@ -96,7 +97,8 @@ function create_config() {
         "mdm_device_ownership": '"\"${DEVICE_OWNERSHIP}\""',
         "mdm_ca_certs_preinstalled": '"${CA_CERTS_PREINSTALLED}"',
         "mdm_skip_cert_suppression": '"${SKIP_CERT_SUPPRESSION}"',
-        "mdm_vendor_name": '"\"${VENDOR_NAME}\""',
+        "mdm_present": '"\"${IS_MANAGED_DEVICE}\""',
+        "mdm_vendor_name": '"\"${DEVICE_MANAGER_NAME}\""',
         "mdm_hide_services": '"${HIDE_SERVICES}"',
         "mdm_disable_quit": '"${DISABLE_QUIT}"',
         "mdm_start_at_boot": '"${START_AT_BOOT}"',
