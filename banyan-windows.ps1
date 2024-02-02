@@ -128,13 +128,9 @@ function download_install() {
 
     $dl_file = $tmp_dir + "\" + "Banyan-Setup-$APP_VERSION.exe"
 
-    if (Test-Path $dl_file -PathType leaf) {
-        Write-Host "Installer EXE already downloaded"
-    } else {
-        $progressPreference = 'silentlyContinue'
-        Invoke-Webrequest "https://www.banyanops.com/app/releases/Banyan-Setup-$APP_VERSION.exe" -outfile $dl_file -UseBasicParsing
-        $progressPreference = 'Continue'
-    }
+    $progressPreference = 'silentlyContinue'
+    Invoke-Webrequest "https://www.banyanops.com/app/releases/Banyan-Setup-$APP_VERSION.exe" -outfile $dl_file -UseBasicParsing
+    $progressPreference = 'Continue'
 
     Write-Host "Run installer"
     Start-Process -FilePath $dl_file -ArgumentList "/S" -Wait
