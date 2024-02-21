@@ -101,11 +101,7 @@ function download_install() {
     dl_file="${tmp_dir}/${dl_path}"
 
 
-    if [[ -f "${dl_file}" ]]; then
-        echo "Installer DEB/RPM already downloaded"
-    else
-        curl -sL "https://www.banyanops.com/app/releases/${dl_path}" -o "${dl_file}"
-    fi
+    curl -sL "https://www.banyanops.com/app/releases/${dl_path}" -o "${dl_file}"
 
     echo "Run installer"
     if [[ $(command -v yum) ]]; then
