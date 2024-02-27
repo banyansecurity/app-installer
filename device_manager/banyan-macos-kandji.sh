@@ -127,11 +127,7 @@ function download_install() {
     full_version="${APP_VERSION}${arm_suffix}"
     dl_file="${tmp_dir}/Banyan-${full_version}.pkg"
 
-    if [[ -f "${dl_file}" ]]; then
-        echo "Installer PKG already downloaded"
-    else
-        curl -sL "https://www.banyanops.com/app/releases/Banyan-${full_version}.pkg" -o "${dl_file}"
-    fi
+    curl -sL "https://www.banyanops.com/app/releases/Banyan-${full_version}.pkg" -o "${dl_file}"
 
     echo "Run installer"
     sudo installer -pkg "${dl_file}" -target /
