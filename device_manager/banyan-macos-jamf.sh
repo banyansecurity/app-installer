@@ -138,6 +138,7 @@ function download_install() {
 function stage() {
     echo "Running staged deployment"
     /Applications/Banyan.app/Contents/Resources/bin/banyanapp-admin stage --key=$DEPLOYMENT_KEY
+    [[ $? -ne 0 ]] && exit 1 # Exit if non-zero exit code
     sleep 3
     echo "Staged deployment done. Have the user start the Banyan app to complete registration."
 }

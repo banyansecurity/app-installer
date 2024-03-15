@@ -140,7 +140,11 @@ function download_install() {
 
 function stage() {
     Write-Host "Running staged deployment"
-    Start-Process -FilePath "C:\Program Files\Banyan\resources\bin\banyanapp-admin.exe" -ArgumentList "stage --key=$DEPLOYMENT_KEY" -Wait
+    $process = Start-Process -FilePath "C:\Program Files\Banyan\resources\bin\banyanapp-admin.exe" -ArgumentList "stage --key=$DEPLOYMENT_KEY" -Wait -PassThru
+    if ($process.ExitCode -ne 0) {
+        Write-Host "Error during staged deployment"
+        exit 1
+    }
     Start-Sleep -Seconds 3
     Write-Host "Staged deployment done. Have the logged_on_user start the Banyan app to complete registration."
 }
