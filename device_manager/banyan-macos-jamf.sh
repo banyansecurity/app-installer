@@ -128,6 +128,10 @@ function download_install() {
     dl_file="${tmp_dir}/Banyan-${full_version}.pkg"
 
     curl -sL "https://www.banyanops.com/app/releases/Banyan-${full_version}.pkg" -o "${dl_file}"
+    if [[ $? -ne 0 ]]; then
+        echo "Failed to download installer PKG"
+        exit 1
+    fi
 
     echo "Run installer"
     sudo installer -pkg "${dl_file}" -target /
