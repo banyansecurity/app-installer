@@ -7,7 +7,8 @@
 # Deployment Information
 # Obtain from the Banyan admin console: Settings > App Deployment
 INVITE_CODE="$1"
-APP_VERSION="$2"
+DEPLOYMENT_KEY="$2"
+APP_VERSION="$3"
 
 # Device Registration and Banyan App Configuration
 # Check docs for more options and details:
@@ -112,11 +113,25 @@ function download_install() {
     sleep 5
 }
 
+function start_app() {
+    echo "Starting the Banyan app as: $logged_on_user"
+    #start app and disown from shell
+    sudo sudo -u "$logged_on_user" nohup /opt/Banyan/banyanapp &>/dev/null & disown
+    sleep 5
+}
 
 function stop_app() {
     echo "Stopping Banyan app"
     killall banyanapp
     sleep 2
+}
+
+function stage() {
+      echo "Running staged deployment"
+      /opt/Banyan/resources/bin/banyanapp-admin stage --key=$DEPLOYMENT_KEY
+      [[ $? -ne 0 ]] && exit 1 # Exit if non-zero exit code
+      sleep 3
+      echo "Staged deployment done. Have the user start the Banyan app to complete registration."
 }
 
 
@@ -129,5 +144,7 @@ else
     stop_app
     create_config
     download_install
+    stage
     create_config
+    start_app
 fi
