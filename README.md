@@ -40,9 +40,9 @@ Launch PowerShell as Administrator and run:
 Launch a terminal and run:
 
 ```bash
-sudo ./banyan-linux.sh <INVITE_CODE> <APP_VERSION (optional)>
+sudo ./banyan-linux.sh <INVITE_CODE> <DEPLOYMENT_KEY> <APP_VERSION (optional)>
 ```
-Note that the Linux script doesn't stage the app with the device certificate or start it up.
+NOTE: The Linux script doesn't currently support MDM supplied user Information.
 
 ---
 
@@ -79,7 +79,6 @@ Launch a terminal and run:
 ```bash
 sudo ./banyan-linux.sh upgrade <APP_VERSION (optional)>
 ```
-Note that the Linux script doesn't start up the app.
 
 ---
 
