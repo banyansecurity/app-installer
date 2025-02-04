@@ -174,6 +174,14 @@ function start_app() {
     delete_scheduled_task($task_name)
 }
 
+function allow_app() {
+    New-NetFirewallRule `
+        -DisplayName "SonicWall-CSE-App" `
+        -Program "C:\Program Files\Banyan\Banyan.exe" `
+        -Direction Outbound `
+        -Action Allow `
+        -Profile Domain,Private,Public
+}
 
 function stop_app() {
     Write-Host "Stopping Banyan app"
@@ -195,5 +203,6 @@ if (($INVITE_CODE -eq "upgrade") -and ($DEPLOYMENT_KEY -eq "upgrade")) {
     download_install
     stage
     create_config
+    allow_app
     start_app
 }

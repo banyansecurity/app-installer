@@ -181,6 +181,14 @@ function stop_app() {
     Start-Sleep -Seconds 2
 }
 
+function allow_app() {
+    New-NetFirewallRule `
+        -DisplayName "SonicWall-CSE-App" `
+        -Program "C:\Program Files\Banyan\Banyan.exe" `
+        -Direction Outbound `
+        -Action Allow `
+        -Profile Domain,Private,Public
+}
 
 if (($INVITE_CODE -eq "upgrade") -and ($DEPLOYMENT_KEY -eq "upgrade")) {
     Write-Host "Running upgrade flow"
@@ -195,5 +203,6 @@ if (($INVITE_CODE -eq "upgrade") -and ($DEPLOYMENT_KEY -eq "upgrade")) {
     download_install
     stage
     create_config
+    allow_app
     start_app
 }
