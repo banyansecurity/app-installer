@@ -27,7 +27,8 @@ $DISABLE_AUTO_UPDATE = $false
 # User Information for Device Certificate
 $MULTI_USER = $true
 
-
+# Preview Feature: Allow App via NetFirewallRule for Windows Firewall.
+$ALLOW_APP = $false
 
 
 ################################################################################
@@ -181,6 +182,16 @@ function stop_app() {
     Start-Sleep -Seconds 2
 }
 
+function allow_app() {
+    if ($ALLOW_APP) {
+        New-NetFirewallRule `
+            -DisplayName "SonicWall-CSE-App" `
+            -Program "C:\Program Files\Banyan\Banyan.exe" `
+            -Direction Outbound `
+            -Action Allow `
+            -Profile Public
+        }
+}
 
 if (($INVITE_CODE -eq "upgrade") -and ($DEPLOYMENT_KEY -eq "upgrade")) {
     Write-Host "Running upgrade flow"
@@ -195,5 +206,6 @@ if (($INVITE_CODE -eq "upgrade") -and ($DEPLOYMENT_KEY -eq "upgrade")) {
     download_install
     stage
     create_config
+    allow_app
     start_app
 }
