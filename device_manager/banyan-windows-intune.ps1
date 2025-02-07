@@ -27,6 +27,8 @@ $DISABLE_AUTO_UPDATE = $false
 # User Information for Device Certificate
 $MULTI_USER = $false
 
+# Preview Feature: Allow App via NetFirewallRule for Windows Firewall.
+$ALLOW_APP = $false
 
 
 
@@ -175,12 +177,14 @@ function start_app() {
 }
 
 function allow_app() {
-    New-NetFirewallRule `
-        -DisplayName "SonicWall-CSE-App" `
-        -Program "C:\Program Files\Banyan\Banyan.exe" `
-        -Direction Outbound `
-        -Action Allow `
-        -Profile Domain,Private,Public
+    if ($ALLOW_APP) {
+        New-NetFirewallRule `
+            -DisplayName "SonicWall-CSE-App" `
+            -Program "C:\Program Files\Banyan\Banyan.exe" `
+            -Direction Outbound `
+            -Action Allow `
+            -Profile Public
+        }
 }
 
 function stop_app() {
