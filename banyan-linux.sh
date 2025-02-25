@@ -54,8 +54,7 @@ fi
 
 if [[ -z "$APP_VERSION" ]]; then
     echo "Checking for latest version of app"
-    loc=$( curl -sI https://www.banyanops.com/app/linux/v3/latest-deb | awk '/Location:/ {print $2}' )
-    APP_VERSION=$( awk -F'banyanapp_|_amd64.deb' '{print $2}' <<< "$loc" )
+    APP_VERSION=$( curl -s https://www.banyanops.com/app/releases/latest.yml | grep "version:" | awk '{print $2}' )
 fi
 
 echo "Installing with invite code: $INVITE_CODE"
