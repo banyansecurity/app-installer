@@ -47,7 +47,7 @@ fi
 
 if [[ -z "$APP_VERSION" ]]; then
     echo "Checking for latest version of app"
-    APP_VERSION=$( curl -s https://www.banyanops.com/app/releases/latest.yml") -match "version: (.+)") { $matches[1].Trim() }
+    APP_VERSION=$( curl -s https://www.banyanops.com/app/releases/latest.yml | grep "version:" | awk '{print $2}' )
 fi
 
 

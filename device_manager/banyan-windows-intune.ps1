@@ -49,7 +49,7 @@ if (!$INVITE_CODE -or !$DEPLOYMENT_KEY) {
 
 if (!$APP_VERSION) {
     Write-Host "Checking for latest version of app"
-    $APP_VERSION = (Invoke-RestMethod -Uri "https://www.banyanops.com/app/releases/latest.yml") -match "version: (.+)" | Out-Null; $matches[1]
+    $APP_VERSION = if ((Invoke-RestMethod -Uri "https://www.banyanops.com/app/releases/latest.yml") -match "version: (.+)") {$matches[1].Trim()}
 }
 
 Write-Host "Installing with invite code: $INVITE_CODE"
