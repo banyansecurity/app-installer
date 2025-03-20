@@ -186,7 +186,7 @@ function allow_app() {
             -Program "C:\Program Files\Banyan\Banyan.exe" `
             -Direction Outbound `
             -Action Allow `
-            -Profile Public
+            -Profile Public,Private,Domain
         }
 }
 
