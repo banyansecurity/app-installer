@@ -21,6 +21,7 @@ DEVICE_MANAGER_NAME=""
 HIDE_SERVICES=false
 DISABLE_QUIT=false
 START_AT_BOOT=false
+AUTO_LOGIN=false
 HIDE_ON_START=false
 DISABLE_AUTO_UPDATE=false
 
@@ -82,6 +83,7 @@ function create_config() {
         "mdm_hide_services": '"${HIDE_SERVICES}"',
         "mdm_disable_quit": '"${DISABLE_QUIT}"',
         "mdm_start_at_boot": '"${START_AT_BOOT}"',
+        "mdm_auto_login": '"${AUTO_LOGIN}"',
         "mdm_hide_on_start": '"${HIDE_ON_START}"',
         "mdm_disable_auto_update": '"${DISABLE_AUTO_UPDATE}"'
     }'
