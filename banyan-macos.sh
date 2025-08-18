@@ -25,6 +25,7 @@ AUTO_LOGIN=false
 HIDE_ON_START=true
 DISABLE_AUTO_UPDATE=false
 ALLOW_MULTIORG=false
+
 # User Information for Device Certificate
 MULTI_USER=true
 USERINFO_PATH=""
