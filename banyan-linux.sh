@@ -24,6 +24,7 @@ START_AT_BOOT=false
 AUTO_LOGIN=false
 HIDE_ON_START=false
 DISABLE_AUTO_UPDATE=false
+ALLOW_MULTIORG=false
 
 # Device Certificate will be installed when user registers device
 
@@ -85,7 +86,8 @@ function create_config() {
         "mdm_start_at_boot": '"${START_AT_BOOT}"',
         "mdm_auto_login": '"${AUTO_LOGIN}"',
         "mdm_hide_on_start": '"${HIDE_ON_START}"',
-        "mdm_disable_auto_update": '"${DISABLE_AUTO_UPDATE}"'
+        "mdm_disable_auto_update": '"${DISABLE_AUTO_UPDATE}"',
+        "mdm_multi_org": '"${ALLOW_MULTIORG}"'
     }'
 
     echo "$mdm_config_json" > "${global_config_file}"
