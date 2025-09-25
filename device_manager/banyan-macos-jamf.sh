@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -euo pipefail
 ################################################################################
 # Banyan Zero Touch Installation
 # Confirm or update the following variables prior to running the script
