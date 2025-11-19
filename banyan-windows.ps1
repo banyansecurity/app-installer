@@ -142,7 +142,14 @@ function download_install() {
 
 function stage() {
     Write-Host "Running staged deployment"
-    $process = Start-Process -FilePath "C:\Program Files\Banyan\resources\bin\banyanapp-admin.exe" -ArgumentList "stage --key=$DEPLOYMENT_KEY" -Wait -PassThru
+
+    if (Test-Path 'C:\Program Files\Banyan\resources\bin\banyanapp-admin-worker.exe') {
+        $ADMIN_SERVER = "banyanapp-admin-worker.exe"
+    } else {
+        $ADMIN_SERVER = "banyanapp-admin.exe"
+    }
+
+    $process = Start-Process -FilePath "C:\Program Files\Banyan\resources\bin\$ADMIN_SERVER" -ArgumentList "stage --key=$DEPLOYMENT_KEY" -Wait -PassThru
     if ($process.ExitCode -ne 0) {
         Write-Host "Error during staged deployment"
         exit 1
