@@ -143,7 +143,7 @@ function download_install() {
 function stage() {
     Write-Host "Running staged deployment"
 
-    if ([version]$APP_VERSION -ge [version]"3.28.0") {
+    if (Test-Path 'C:\Program Files\Banyan\resources\bin\banyanapp-admin-worker.exe') {
         $ADMIN_SERVER = "banyanapp-admin-worker.exe"
     } else {
         $ADMIN_SERVER = "banyanapp-admin.exe"
