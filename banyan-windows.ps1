@@ -50,7 +50,11 @@ if (!$INVITE_CODE -or !$DEPLOYMENT_KEY) {
 
 if (!$APP_VERSION) {
     Write-Host "Checking for latest version of app"
-    $APP_VERSION = if ((Invoke-RestMethod -Uri "https://www.banyanops.com/app/releases/latest.yml") -match "version: (.+)") {$matches[1].Trim()}
+    $resp = Invoke-WebRequest -Uri "https://www.banyanops.com/app/windows/v3/latest" -MaximumRedirection 0 -ErrorAction SilentlyContinue
+    $loc = $resp.Headers.Location
+    if ($loc -match 'Banyan-Setup-([0-9]+\.[0-9]+\.[0-9]+)\.exe') {
+        $APP_VERSION = $matches[1].Trim()
+    }
 }
 
 Write-Host "Installing with invite code: $INVITE_CODE"
