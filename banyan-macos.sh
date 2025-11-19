@@ -6,9 +6,9 @@
 
 # Deployment Information
 # Obtain from the Banyan admin console: Settings > App Deployment
-INVITE_CODE="tannerplay"
-DEPLOYMENT_KEY="VBLotjAEs/u4awMb0cU2kmyUylrNX4bTqnIynwUgC3c="
-APP_VERSION=""
+INVITE_CODE="$1"
+DEPLOYMENT_KEY="$2"
+APP_VERSION="$3"
 
 # Device Registration and Banyan App Configuration
 # Check docs for more options and details:
