@@ -1,16 +1,16 @@
 #!/bin/bash
 
 ################################################################################
-# Banyan App Installation for Linux
+# sonicwall_cse_dir_name App Installation for Linux
 # Confirm or update the following variables prior to running the script
 
 # Deployment Information
-# Obtain from the Banyan admin console: Settings > App Deployment
+# Obtain from the sonicwall_cse_dir_name admin console: Settings > App Deployment
 INVITE_CODE="$1"
 DEPLOYMENT_KEY="$2"
 APP_VERSION="$3"
 
-# Device Registration and Banyan App Configuration
+# Device Registration and sonicwallcse App Configuration
 # Check docs for more options and details:
 # https://docs.banyansecurity.io/docs/feature-guides/manage-users-and-devices/device-managers/distribute-desktopapp/#mdm-config-json
 DEVICE_OWNERSHIP="C"
@@ -65,8 +65,8 @@ echo "Installing app version: $APP_VERSION"
 logged_on_user=$( users | awk '{ print $1 }' )
 echo "Installing app for user: $logged_on_user"
 
-global_config_dir="/etc/banyanapp"
-tmp_dir="/etc/banyanapp/tmp"
+global_config_dir="/etc/sonicwallcse"
+tmp_dir="/etc/sonicwallcse/tmp"
 mkdir -p "$tmp_dir"
 
 
@@ -98,9 +98,9 @@ function download_install() {
     echo "Downloading installer DEB/RPM"
 
     if [[ $(command -v yum) ]]; then
-        dl_path="banyanapp-${APP_VERSION}.x86_64.rpm"
+        dl_path="sonicwallcse-${APP_VERSION}.x86_64.rpm"
     else
-        dl_path="banyanapp_${APP_VERSION}_amd64.deb"
+        dl_path="sonicwallcse_${APP_VERSION}_amd64.deb"
     fi
     dl_file="${tmp_dir}/${dl_path}"
 
@@ -117,24 +117,24 @@ function download_install() {
 }
 
 function start_app() {
-    echo "Starting the Banyan app as: $logged_on_user"
+    echo "Starting the SonicWall Cloud Secure Edge app as: $logged_on_user"
     #start app and disown from shell
-    sudo sudo -u "$logged_on_user" nohup /opt/Banyan/banyanapp &>/dev/null & disown
+    sudo sudo -u "$logged_on_user" nohup /opt/sonicwallcse/sonicwallcseapp &>/dev/null & disown
     sleep 5
 }
 
 function stop_app() {
-    echo "Stopping Banyan app"
-    killall banyanapp
+    echo "Stopping SonicWall Cloud Secure Edge app"
+    killall sonicwallcse
     sleep 2
 }
 
 function stage() {
       echo "Running staged deployment"
-      /opt/Banyan/resources/bin/banyanapp-admin stage --key=$DEPLOYMENT_KEY
+      /opt/sonicwallcse/resources/bin/sonicwall-cse-admin stage --key=$DEPLOYMENT_KEY
       [[ $? -ne 0 ]] && exit 1 # Exit if non-zero exit code
       sleep 3
-      echo "Staged deployment done. Have the user start the Banyan app to complete registration."
+      echo "Staged deployment done. Have the user start the sonicwall_cse_dir_name app to complete registration."
 }
 
 

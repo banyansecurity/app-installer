@@ -1,23 +1,23 @@
 #!/bin/bash
 
 ################################################################################
-# Banyan Zero Touch Installation
+# SonicWall Cloud Secure Edge Zero Touch Installation
 # Confirm or update the following variables prior to running the script
 
 # Deployment Information
-# Obtain from the Banyan admin console: Settings > App Deployment
-INVITE_CODE="$4"
-DEPLOYMENT_KEY="$5"
-APP_VERSION="$6"
+# Obtain from the SonicWall Cloud Secure Edge admin console: Settings > App Deployment
+INVITE_CODE="<YOUR_INVITE_CODE>"
+DEPLOYMENT_KEY="<YOUR_DEPLOYMENT_KEY>"
+APP_VERSION="<YOUR_APP_VERSION (optional)>"
 
-# Device Registration and Banyan App Configuration
+# Device Registration and SonicWall Cloud Secure Edge App Configuration
 # Check docs for more options and details:
 # https://docs.banyansecurity.io/docs/feature-guides/manage-users-and-devices/device-managers/distribute-desktopapp/#mdm-config-json
 DEVICE_OWNERSHIP="C"
 CA_CERTS_PREINSTALLED=false
 SKIP_CERT_SUPPRESSION=false
 IS_MANAGED_DEVICE=true
-DEVICE_MANAGER_NAME="Jamf"
+DEVICE_MANAGER_NAME="Kandji"
 HIDE_SERVICES=false
 DISABLE_QUIT=false
 START_AT_BOOT=true
@@ -28,9 +28,9 @@ ALLOW_MULTIORG=false
 
 # User Information for Device Certificate
 MULTI_USER=false
-USERINFO_PATH="/Library/Managed Preferences/userinfo.plist"
-USERINFO_USER_VAR="deploy_user"
-USERINFO_EMAIL_VAR="deploy_email"
+USERINFO_PATH="/Library/Managed Preferences/io.kandji.globalvariables.plist"
+USERINFO_USER_VAR="FULL_NAME"
+USERINFO_EMAIL_VAR="EMAIL"
 
 ################################################################################
 
@@ -61,8 +61,8 @@ echo "Installing app version: $APP_VERSION"
 logged_on_user=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
 echo "Installing app for user: $logged_on_user"
 
-global_config_dir="/etc/banyanapp"
-tmp_dir="/etc/banyanapp/tmp"
+global_config_dir="/etc/sonicwallcse/"
+tmp_dir="/etc/sonicwallcse/tmp"
 mkdir -p "$tmp_dir"
 
 
@@ -127,13 +127,9 @@ function download_install() {
     fi
 
     full_version="${APP_VERSION}${arm_suffix}"
-    dl_file="${tmp_dir}/Banyan-${full_version}.pkg"
+    dl_file="${tmp_dir}/SonicWallCSE-${full_version}.pkg"
 
-    curl -sL "https://www.banyanops.com/app/releases/Banyan-${full_version}.pkg" -o "${dl_file}"
-    if [[ $? -ne 0 ]]; then
-        echo "Failed to download installer PKG"
-        exit 1
-    fi
+    curl -sL "https://www.banyanops.com/app/releases/SonicWallCSE-${full_version}.pkg" -o "${dl_file}"
 
     echo "Run installer"
     sudo installer -pkg "${dl_file}" -target /
@@ -143,23 +139,23 @@ function download_install() {
 
 function stage() {
     echo "Running staged deployment"
-    /Applications/Banyan.app/Contents/Resources/bin/banyanapp-admin stage --key=$DEPLOYMENT_KEY
+    "/Applications/SonicWall Cloud Secure Edge.app/Contents/Resources/bin/sonicwall-cse-admin" stage --key=$DEPLOYMENT_KEY
     [[ $? -ne 0 ]] && exit 1 # Exit if non-zero exit code
     sleep 3
-    echo "Staged deployment done. Have the user start the Banyan app to complete registration."
+    echo "Staged deployment done. Have the user start the SonicWall Cloud Secure Edge app to complete registration."
 }
 
 
 function start_app() {
-    echo "Starting the Banyan app as: $logged_on_user"
-    sudo -H -u "${logged_on_user}" open /Applications/Banyan.app
+    echo "Starting the SonicWall Cloud Secure Edge app as: $logged_on_user"
+    sudo -H -u "${logged_on_user}" open "/Applications/SonicWall Cloud Secure Edge.app"
     sleep 5
 }
 
 
 function stop_app() {
-    echo "Stopping Banyan app"
-    killall Banyan
+    echo "Stopping SonicWall Cloud Secure Edge app"
+    killall "SonicWall Cloud Secure Edge"
     sleep 2
 }
 

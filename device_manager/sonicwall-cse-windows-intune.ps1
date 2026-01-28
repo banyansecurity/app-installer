@@ -1,23 +1,23 @@
 # Run as administrator
 
 ################################################################################
-# Banyan Zero Touch Installation
+# SonicWall Cloud Secure Edge Zero Touch Installation
 # Confirm or update the following variables prior to running the script
 
 # Deployment Information
-# Obtain from the Banyan admin console: Settings > App Deployment
-$INVITE_CODE = $args[0]
-$DEPLOYMENT_KEY = $args[1]
-$APP_VERSION = $args[2]
+# Obtain from the SonicWall Cloud Secure Edge admin console: Settings > App Deployment
+$INVITE_CODE = "<YOUR_INVITE_CODE>"
+$DEPLOYMENT_KEY = "<YOUR_DEPLOYMENT_KEY>"
+$APP_VERSION = "<YOUR_APP_VERSION (optional)>"
 
-# Device Registration and Banyan App Configuration
+# Device Registration and SonicWall Cloud Secure Edge App Configuration
 # Check docs for more options and details:
 # https://docs.banyansecurity.io/docs/feature-guides/manage-users-and-devices/device-managers/distribute-desktopapp/#mdm-config-json
-$DEVICE_OWNERSHIP = "S"
+$DEVICE_OWNERSHIP = "C"
 $CA_CERTS_PREINSTALLED = $false
 $SKIP_CERT_SUPPRESSION = $false
-$IS_MANAGED_DEVICE = $false
-$DEVICE_MANAGER_NAME = ""
+$IS_MANAGED_DEVICE = $true
+$DEVICE_MANAGER_NAME = "Intune"
 $HIDE_SERVICES = $false
 $DISABLE_QUIT = $false
 $START_AT_BOOT = $true
@@ -27,10 +27,11 @@ $DISABLE_AUTO_UPDATE = $false
 $ALLOW_MULTIORG = $false
 
 # User Information for Device Certificate
-$MULTI_USER = $true
+$MULTI_USER = $false
 
 # Preview Feature: Allow App via NetFirewallRule for Windows Firewall.
 $ALLOW_APP = $false
+
 
 
 ################################################################################
@@ -52,7 +53,7 @@ if (!$APP_VERSION) {
     Write-Host "Checking for latest version of app"
     $resp = Invoke-WebRequest -Uri "https://www.banyanops.com/app/windows/v3/latest" -MaximumRedirection 0 -ErrorAction SilentlyContinue -UseBasicParsing
     $loc = $resp.Headers.Location
-    if ($loc -match 'Banyan-Setup-([0-9]+\.[0-9]+\.[0-9]+)\.exe') {
+    if ($loc -match 'SonicWallCSE-([0-9]+\.[0-9]+\.[0-9]+)\.exe') {
         $APP_VERSION = $matches[1].Trim()
     }
 }
@@ -97,8 +98,8 @@ function get_user_email() {
 function create_config() {
     Write-Host "Creating mdm-config json file"
 
-    $banyan_dir_name = "Banyan"
-    $global_config_dir = $global_profile_dir + "\" + $banyan_dir_name
+    $sonicwall_cse_dir_name = "sonicwallcse"
+    $global_config_dir = $global_profile_dir + "\" + $sonicwall_cse_dir_name
     $global_config_file = $global_config_dir + "\" + "mdm-config.json"
 
     $json = [pscustomobject]@{
@@ -113,13 +114,12 @@ function create_config() {
         mdm_hide_services = $HIDE_SERVICES
         mdm_disable_quit = $DISABLE_QUIT
         mdm_start_at_boot = $START_AT_BOOT
-        mdm_auto_login = $AUTO_LOGIN
         mdm_hide_on_start = $HIDE_ON_START
         mdm_disable_auto_update = $DISABLE_AUTO_UPDATE
         mdm_multi_org = $ALLOW_MULTIORG
     } | ConvertTo-Json
 
-    New-Item -Path $global_profile_dir -Name $banyan_dir_name -ItemType "directory" -Force | Out-Null
+    New-Item -Path $global_profile_dir -Name $sonicwall_cse_dir_name -ItemType "directory" -Force | Out-Null
     Set-Content -Path $global_config_file -Value $json -NoNewLine
 }
 
@@ -127,15 +127,15 @@ function create_config() {
 function download_install() {
     Write-Host "Downloading installer EXE"
 
-    $tmp_dir_name = "banyantemp"
+    $tmp_dir_name = "sonicwallcsetemp"
     $tmp_dir = $global_profile_dir + "\" + $tmp_dir_name
 
     New-Item -Path $global_profile_dir -Name $tmp_dir_name -ItemType "directory" -Force | Out-Null
 
-    $dl_file = $tmp_dir + "\" + "Banyan-Setup-$APP_VERSION.exe"
+    $dl_file = $tmp_dir + "\" + "SonicWallCSE-$APP_VERSION.exe"
 
     $progressPreference = 'silentlyContinue'
-    Invoke-Webrequest "https://www.banyanops.com/app/releases/Banyan-Setup-$APP_VERSION.exe" -outfile $dl_file -UseBasicParsing
+    Invoke-Webrequest "https://www.banyanops.com/app/releases/SonicWallCSE-$APP_VERSION.exe" -outfile $dl_file -UseBasicParsing
     $progressPreference = 'Continue'
 
     Write-Host "Run installer"
@@ -147,25 +147,25 @@ function download_install() {
 function stage() {
     Write-Host "Running staged deployment"
 
-    if (Test-Path 'C:\Program Files\Banyan\resources\bin\banyanapp-admin-worker.exe') {
-        $ADMIN_SERVER = "banyanapp-admin-worker.exe"
+    if (Test-Path 'C:\Program Files\SonicWall Cloud Secure Edge\resources\bin\sonicwall-cse-admin-worker.exe') {
+        $ADMIN_SERVER = "sonicwall-cse-admin-worker.exe"
     } else {
-        $ADMIN_SERVER = "banyanapp-admin.exe"
+        $ADMIN_SERVER = "sonicwall-cse-admin.exe"
     }
 
-    $process = Start-Process -FilePath "C:\Program Files\Banyan\resources\bin\$ADMIN_SERVER" -ArgumentList "stage --key=$DEPLOYMENT_KEY" -Wait -PassThru
+    $process = Start-Process -FilePath "C:\Program Files\SonicWall Cloud Secure Edge\resources\bin\$ADMIN_SERVER" -ArgumentList "stage --key=$DEPLOYMENT_KEY" -Wait -PassThru
     if ($process.ExitCode -ne 0) {
         Write-Host "Error during staged deployment"
         exit 1
     }
     Start-Sleep -Seconds 3
-    Write-Host "Staged deployment done. Have the logged_on_user start the Banyan app to complete registration."
+    Write-Host "Staged deployment done. Have the logged_on_user start the SonicWall Cloud Secure Edge app to complete registration."
 }
 
 
 function create_scheduled_task($task_name) {
     Write-Host "Creating ScheduledTask $task_name for logged_on_user, so app launches upon next user login"
-    $action = New-ScheduledTaskAction -Execute "C:\Program Files\Banyan\Banyan.exe"
+    $action = New-ScheduledTaskAction -Execute "C:\Program Files\SonicWall Cloud Secure Edge\SonicWall Cloud Secure Edge.exe"
     $trigger = New-ScheduledTaskTrigger -AtLogOn
     $principal = New-ScheduledTaskPrincipal -UserId $logged_on_user
     $task = New-ScheduledTask -Action $action -Trigger $trigger -Principal $principal
@@ -177,33 +177,33 @@ function delete_scheduled_task($task_name) {
     Unregister-ScheduledTask -TaskName $task_name -Confirm:$false
 }
 
-# since Windows doesn't have "su - username", we use scheduled_task to launch Banyan app as logged_on user
+# since Windows doesn't have "su - username", we use scheduled_task to launch SonicWall Cloud Secure Edge app as logged_on user
 function start_app() {
-    Write-Host "Running ScheduledTask to start the Banyan app as: $logged_on_user"
-    $task_name = "StartBanyanTemp"
+    Write-Host "Running ScheduledTask to start the SonicWall Cloud Secure Edge app as: $logged_on_user"
+    $task_name = "StartSonicWallCSETemp"
     create_scheduled_task($task_name)
     Start-ScheduledTask -TaskName $task_name
     Start-Sleep -Seconds 5
     delete_scheduled_task($task_name)
 }
 
-
-function stop_app() {
-    Write-Host "Stopping Banyan app"
-    Get-Process -Name Banyan -ErrorAction SilentlyContinue | Stop-Process -Force
-    Start-Sleep -Seconds 2
-}
-
 function allow_app() {
     if ($ALLOW_APP) {
         New-NetFirewallRule `
             -DisplayName "SonicWall-CSE-App" `
-            -Program "C:\Program Files\Banyan\Banyan.exe" `
+            -Program "C:\Program Files\SonicWall Cloud Secure Edge\SonicWall Cloud Secure Edge.exe" `
             -Direction Outbound `
             -Action Allow `
             -Profile Public,Private,Domain
         }
 }
+
+function stop_app() {
+    Write-Host "Stopping SonicWall Cloud Secure Edge app"
+    Get-Process -Name "SonicWall Cloud Secure Edge" -ErrorAction SilentlyContinue | Stop-Process -Force
+    Start-Sleep -Seconds 2
+}
+
 
 if (($INVITE_CODE -eq "upgrade") -and ($DEPLOYMENT_KEY -eq "upgrade")) {
     Write-Host "Running upgrade flow"
