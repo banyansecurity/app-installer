@@ -132,10 +132,10 @@ function download_install() {
 
     New-Item -Path $global_profile_dir -Name $tmp_dir_name -ItemType "directory" -Force | Out-Null
 
-    $dl_file = $tmp_dir + "\" + "SonicWallCSE-$APP_VERSION.exe"
+    $dl_file = $tmp_dir + "\" + "sonicwallcse-$APP_VERSION.exe"
 
     $progressPreference = 'silentlyContinue'
-    Invoke-Webrequest "https://www.banyanops.com/app/releases/SonicWallCSE-$APP_VERSION.exe" -outfile $dl_file -UseBasicParsing
+    Invoke-Webrequest "https://www.banyanops.com/app/releases/sonicwallcse-$APP_VERSION.exe" -outfile $dl_file -UseBasicParsing
     $progressPreference = 'Continue'
 
     Write-Host "Run installer"
