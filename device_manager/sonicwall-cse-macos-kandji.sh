@@ -127,9 +127,9 @@ function download_install() {
     fi
 
     full_version="${APP_VERSION}${arm_suffix}"
-    dl_file="${tmp_dir}/SonicWallCSE-${full_version}.pkg"
+    dl_file="${tmp_dir}/sonicwallcse-${full_version}.pkg"
 
-    curl -sL "https://www.banyanops.com/app/releases/SonicWallCSE-${full_version}.pkg" -o "${dl_file}"
+    curl -sL "https://www.banyanops.com/app/releases/sonicwallcse-${full_version}.pkg" -o "${dl_file}"
 
     echo "Run installer"
     sudo installer -pkg "${dl_file}" -target /

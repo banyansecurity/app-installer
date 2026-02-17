@@ -52,7 +52,7 @@ if (!$APP_VERSION) {
     Write-Host "Checking for latest version of app"
     $resp = Invoke-WebRequest -Uri "https://www.banyanops.com/app/windows/v3/latest" -MaximumRedirection 0 -ErrorAction SilentlyContinue -UseBasicParsing
     $loc = $resp.Headers.Location
-    if ($loc -match 'SonicWallCSE-([0-9]+\.[0-9]+\.[0-9]+)\.exe') {
+    if ($loc -match 'sonicwallcse-([0-9]+\.[0-9]+\.[0-9]+)\.exe') {
         $APP_VERSION = $matches[1].Trim()
     }
 }
