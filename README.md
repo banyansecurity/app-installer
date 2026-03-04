@@ -1,4 +1,5 @@
-# Banyan App Installer
+# Banyan App Installer (For 3.X.X Banyan App) 
+# NOTE: For Re-Branded App v4.0.0 Please Use https://github.com/banyansecurity/sonicwall-cse-app-installer (SonicWall Cloud Security Edge App)
 
 Automate installation of Banyan App on end-user devices.
 
